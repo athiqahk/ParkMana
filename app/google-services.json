@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "121356958914",
+    "project_id": "parkmana-53b2b",
+    "storage_bucket": "parkmana-53b2b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:121356958914:android:efe7ab8042603c33d44f5b",
+        "android_client_info": {
+          "package_name": "com.example.parkmana"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCh9PUgV34U1AzA61Eo7_K8KDulIFYimjQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
