@@ -34,32 +34,37 @@ android {
 
 dependencies {
 
+    // ---------- AndroidX core UI ----------
     implementation libs.appcompat
     implementation libs.material
     implementation libs.constraintlayout
+
+    // ---------- Onboarding swipe pages ----------
+    // ViewPager2 powers the 3 swipeable onboarding screens.
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
+
+    // ---------- MVVM (ViewModel + LiveData) ----------
     implementation libs.lifecycle.livedata.ktx
     implementation libs.lifecycle.viewmodel.ktx
+
+    // ---------- Navigation Component (single-activity navigation) ----------
     implementation libs.navigation.fragment
     implementation libs.navigation.ui
-    implementation libs.firebase.auth
+
+    // ---------- Firebase ----------
+    // The BoM controls ALL Firebase library versions, so the individual
+    // Firebase dependencies below are declared WITHOUT a version number.
+    implementation platform('com.google.firebase:firebase-bom:34.14.0')
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+
+    // ---------- Google Sign-In (Credential Manager) ----------
     implementation libs.credentials
     implementation libs.credentials.play.services.auth
     implementation libs.googleid
-    //---Firebase Android BoM to control library versioning---
-    // Import the BoM for the Firebase platform
-    implementation platform('com.google.firebase:firebase-bom:34.14.0')
-    // Declare the dependencies for the desired Firebase products without specifying versions
-    // For example, declare the dependencies for Firebase Authentication and Cloud Firestore
-    implementation 'com.google.firebase:firebase-auth'
-    implementation 'com.google.firebase:firebase-firestore'
-    // Import the BoM for the Firebase platform
-    implementation(platform("com.google.firebase:firebase-bom:34.14.0"))
-    //---Google Play services SDK---
-    // Add the dependency for the Firebase Authentication library
-    // When using the BoM, you don't specify versions in Firebase library dependencies
-    implementation("com.google.firebase:firebase-auth")
-    // Also add the dependency for the Google Play services library and specify its version
-    implementation("com.google.android.gms:play-services-auth:21.6.0")
+    implementation 'com.google.android.gms:play-services-auth:21.6.0'
+
+    // ---------- Testing ----------
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

@@ -12,15 +12,25 @@
           "package_name": "com.example.parkmana"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "121356958914-n0oq393c05r95o5ajnfpoitqudv2dr5b.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyCh9PUgV34U1AzA61Eo7_K8KDulIFYimjQ"
+          "current_key": "AIzaSyBVCzT5HookATaDXs1ZOpXwUfqVJATQ3_s"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "121356958914-n0oq393c05r95o5ajnfpoitqudv2dr5b.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }
