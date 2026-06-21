@@ -12,17 +12,41 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ParkMana"
         tools:targetApi="31">
+        <!-- Splash is the launcher screen, using the orange splash theme. -->
         <activity
-            android:name=".MainActivity"
+            android:name=".ui.splash.SplashActivity"
             android:exported="true"
-            android:label="@string/app_name"
-            android:theme="@style/Theme.ParkMana.NoActionBar">
+            android:theme="@style/Theme.ParkMana.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- MainActivity will host onboarding/login/register (no longer the launcher). -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="false" />
+
+        <!-- TEMPORARY placeholder Home — your teammate replaces this later. -->
+        <activity
+            android:name=".ui.home.HomeActivity"
+            android:exported="false" />
+
+        <!-- Onboarding (shown to users who aren't signed in). -->
+        <activity
+            android:name=".ui.onboarding.OnboardingActivity"
+            android:exported="false" />
+
+        <!-- Login -->
+        <activity
+            android:name=".ui.auth.LoginActivity"
+            android:exported="false" />
+
+        <!-- Register -->
+        <activity
+            android:name=".ui.auth.RegisterActivity"
+            android:exported="false" />
     </application>
 
 </manifest>
