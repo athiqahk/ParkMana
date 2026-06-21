@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -12,7 +16,11 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ParkMana"
         tools:targetApi="31">
-        <!-- Splash is the launcher screen, using the orange splash theme. -->
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyAk5ER-8KcF8YS7tV7PgZG9Q6dp7nDk1JA" />
+
         <activity
             android:name=".ui.splash.SplashActivity"
             android:exported="true"
@@ -23,30 +31,18 @@
             </intent-filter>
         </activity>
 
-        <!-- MainActivity will host onboarding/login/register (no longer the launcher). -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
+        <activity android:name=".MainActivity" android:exported="false" />
 
-        <!-- TEMPORARY placeholder Home — your teammate replaces this later. -->
-        <activity
-            android:name=".ui.home.HomeActivity"
-            android:exported="false" />
+        <activity android:name=".ui.home.HomeActivity" android:exported="false" />
 
-        <!-- Onboarding (shown to users who aren't signed in). -->
-        <activity
-            android:name=".ui.onboarding.OnboardingActivity"
-            android:exported="false" />
+        <activity android:name=".ui.navigation.NavigationActivity" android:exported="false" />
 
-        <!-- Login -->
-        <activity
-            android:name=".ui.auth.LoginActivity"
-            android:exported="false" />
+        <activity android:name=".ui.onboarding.OnboardingActivity" android:exported="false" />
 
-        <!-- Register -->
-        <activity
-            android:name=".ui.auth.RegisterActivity"
-            android:exported="false" />
+        <activity android:name=".ui.auth.LoginActivity" android:exported="false" />
+
+        <activity android:name=".ui.auth.RegisterActivity" android:exported="false" />
+
     </application>
 
 </manifest>

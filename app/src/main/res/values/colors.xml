@@ -1,22 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- ===== ParkMana brand palette ===== -->
-    <color name="park_orange">#E8623D</color>          <!-- primary: buttons, logo, accents -->
-    <color name="park_orange_dark">#CF5331</color>     <!-- pressed / darker accent -->
-    <color name="park_orange_light">#FBE3DA</color>    <!-- pill backgrounds & tints (e.g. "Step 1 of 3") -->
+    <!-- Required by launcher icon -->
+    <color name="ic_launcher_background">#FFFFFF</color>
 
-    <!-- ===== Neutrals ===== -->
-    <color name="park_background">#F6F7F8</color>      <!-- screen background -->
-    <color name="park_surface">#FFFFFF</color>        <!-- cards, input fields -->
-    <color name="park_text_primary">#1A1A1A</color>   <!-- headings -->
-    <color name="park_text_secondary">#6B7280</color> <!-- body text / hints -->
-    <color name="park_border">#E5E7EB</color>         <!-- input & card borders -->
+    <!-- ParkMana brand palette -->
+    <color name="park_orange">#E8623D</color>
+    <color name="park_orange_dark">#CF5331</color>
+    <color name="park_orange_light">#FBE3DA</color>
+
+    <!-- Neutrals -->
+    <color name="park_background">#F6F7F8</color>
+    <color name="park_surface">#FFFFFF</color>
+    <color name="park_text_primary">#1A1A1A</color>
+    <color name="park_text_secondary">#6B7280</color>
+    <color name="park_border">#E5E7EB</color>
 
     <color name="white">#FFFFFFFF</color>
     <color name="black">#FF000000</color>
 
-    <!-- ===== Template leftovers (safe to delete later once the theme is fully switched) ===== -->
+    <!-- Template colors -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
