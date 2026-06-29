@@ -12,7 +12,7 @@
         android:layout_height="match_parent" />
 
     <!-- Search bar -->
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/searchBar"
         android:layout_width="match_parent"
         android:layout_height="55dp"
@@ -20,10 +20,13 @@
         android:layout_marginTop="28dp"
         android:layout_marginEnd="24dp"
         android:background="@drawable/bg_white_rounded"
-        android:hint="🔍  Search parking, place..."
+        android:hint="🔍 Search parking, place..."
         android:paddingStart="18dp"
         android:paddingEnd="18dp"
-        android:textSize="14sp" />
+        android:textSize="14sp"
+        android:dropDownHeight="300dp"
+        android:dropDownVerticalOffset="5dp"
+        android:completionThreshold="1"/>
 
     <!-- Filter chips -->
     <LinearLayout
@@ -66,20 +69,6 @@
             android:textSize="11sp"
             android:textStyle="bold" />
     </LinearLayout>
-
-    <!-- Parking label on map -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="30dp"
-        android:layout_gravity="center"
-        android:background="@drawable/bg_black_label"
-        android:gravity="center"
-        android:paddingStart="14dp"
-        android:paddingEnd="14dp"
-        android:text="Central Plaza Parking"
-        android:textColor="#FFFFFF"
-        android:textSize="11sp"
-        android:textStyle="bold" />
 
     <!-- Locate me button UI -->
     <Button

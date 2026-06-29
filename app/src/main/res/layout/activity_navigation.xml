@@ -68,6 +68,7 @@
 
     <!-- Parking label -->
     <TextView
+        android:id="@+id/topParkingName"
         android:layout_width="150dp"
         android:layout_height="35dp"
         android:layout_gravity="top|end"
@@ -75,7 +76,7 @@
         android:layout_marginEnd="20dp"
         android:background="@drawable/bg_black_label"
         android:gravity="center"
-        android:text="Central Plaza Parking"
+        android:text="Parking"
         android:textColor="#FFFFFF"
         android:textSize="11sp"
         android:textStyle="bold"/>
@@ -115,9 +116,10 @@
                 android:orientation="vertical">
 
                 <TextView
+                    android:id="@+id/parkingNameText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Central Plaza Parking"
+                    android:text="Parking"
                     android:textColor="#111111"
                     android:textStyle="bold"/>
 

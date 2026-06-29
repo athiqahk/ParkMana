@@ -33,6 +33,22 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+import android.widget.AdapterView;
+
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse;
+import com.google.android.libraries.places.api.model.AutocompletePrediction;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * PAGE 1:
  * Shows user's current location and searches nearby parking using Google Places API.
@@ -41,10 +57,16 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final int LOCATION_PERMISSION_CODE = 100;
 
-    private static final String GOOGLE_API_KEY = "AIzaSyAk5ER-8KcF8YS7tV7PgZG9Q6dp7nDk1JA";
+    private static final String GOOGLE_API_KEY = "AIzaSyBil5a0ILtVvwX8la3e9Pii9LYWZy_8k6s";
 
     private GoogleMap googleMap;
     private FusedLocationProviderClient fusedLocationClient;
+
+    private PlacesClient placesClient;
+
+    private AutoCompleteTextView searchBar;
+
+    private List<AutocompletePrediction> predictionList = new ArrayList<>();
 
     private TextView parkingCountText;
     private TextView parkingNameText;
@@ -60,86 +82,269 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
 
+        //========================
+        // Views
+        //========================
+        searchBar = findViewById(R.id.searchBar);
+
         parkingCountText = findViewById(R.id.parkingCountText);
         parkingNameText = findViewById(R.id.parkingNameText);
         parkingInfoText = findViewById(R.id.parkingInfoText);
+
         btnNavigate = findViewById(R.id.btnNavigate);
 
         btnNavigate.setEnabled(false);
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+        //========================
+        // Places SDK
+        //========================
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), GOOGLE_API_KEY);
+        }
 
+        placesClient = Places.createClient(this);
+
+        //========================
+        // GPS
+        //========================
+        fusedLocationClient =
+                LocationServices.getFusedLocationProviderClient(this);
+
+        //========================
+        // Google Map
+        //========================
         SupportMapFragment mapFragment =
-                (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.homeMap);
+                (SupportMapFragment) getSupportFragmentManager()
+                        .findFragmentById(R.id.homeMap);
 
         if (mapFragment != null) {
             mapFragment.getMapAsync(this);
         }
 
+        //========================
+        // Search
+        //========================
+        initializeSearch();
+
+        //========================
+        // Navigate Button
+        //========================
         btnNavigate.setOnClickListener(v -> {
-            if (userLocation == null || selectedParkingLocation == null) {
-                Toast.makeText(this, "Parking location not ready yet", Toast.LENGTH_SHORT).show();
+
+            if (selectedParkingLocation == null) {
+
+                Toast.makeText(
+                        HomeActivity.this,
+                        "Please select a parking location.",
+                        Toast.LENGTH_SHORT
+                ).show();
+
                 return;
             }
 
-            Intent intent = new Intent(HomeActivity.this, NavigationActivity.class);
+            Intent intent =
+                    new Intent(HomeActivity.this,
+                            NavigationActivity.class);
 
-            intent.putExtra("user_lat", userLocation.latitude);
-            intent.putExtra("user_lng", userLocation.longitude);
+            intent.putExtra(
+                    "user_lat",
+                    userLocation.latitude);
 
-            intent.putExtra("parking_lat", selectedParkingLocation.latitude);
-            intent.putExtra("parking_lng", selectedParkingLocation.longitude);
-            intent.putExtra("parking_name", selectedParkingName);
+            intent.putExtra(
+                    "user_lng",
+                    userLocation.longitude);
+
+            intent.putExtra(
+                    "parking_lat",
+                    selectedParkingLocation.latitude);
+
+            intent.putExtra(
+                    "parking_lng",
+                    selectedParkingLocation.longitude);
+
+            intent.putExtra(
+                    "parking_name",
+                    selectedParkingName);
 
             startActivity(intent);
+
         });
+
+    }
+
+    private void initializeSearch() {
+
+        searchBar.addTextChangedListener(new android.text.TextWatcher() {
+
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+                if (s.length() < 2)
+                    return;
+
+                FindAutocompletePredictionsRequest request =
+                        FindAutocompletePredictionsRequest.builder()
+                                .setQuery(s.toString())
+                                .build();
+
+                placesClient.findAutocompletePredictions(request)
+                        .addOnSuccessListener(response -> {
+
+                            predictionList.clear();
+
+                            ArrayList<String> suggestions = new ArrayList<>();
+
+                            for (AutocompletePrediction prediction :
+                                    response.getAutocompletePredictions()) {
+
+                                predictionList.add(prediction);
+
+                                suggestions.add(
+                                        prediction.getFullText(null).toString()
+                                );
+                            }
+
+                            ArrayAdapter<String> adapter =
+                                    new ArrayAdapter<>(
+                                            HomeActivity.this,
+                                            android.R.layout.simple_dropdown_item_1line,
+                                            suggestions);
+
+                            searchBar.setAdapter(adapter);
+                            searchBar.showDropDown();
+
+                        });
+
+            }
+
+            @Override
+            public void afterTextChanged(android.text.Editable s) {
+            }
+
+        });
+
+        searchBar.setOnItemClickListener((parent, view, position, id) -> {
+
+            AutocompletePrediction prediction =
+                    predictionList.get(position);
+
+            FetchPlaceRequest request =
+                    FetchPlaceRequest.newInstance(
+                            prediction.getPlaceId(),
+                            Arrays.asList(
+                                    Place.Field.NAME,
+                                    Place.Field.LAT_LNG
+                            ));
+
+            placesClient.fetchPlace(request)
+                    .addOnSuccessListener(response -> {
+
+                        Place place = response.getPlace();
+
+                        if (place.getLatLng() == null)
+                            return;
+
+                        googleMap.animateCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                        place.getLatLng(),
+                                        16f
+                                )
+                        );
+
+                        // Search nearby parking around the searched place
+                        findNearbyParking(place.getLatLng());
+
+                    });
+
+        });
+
     }
 
     @Override
     public void onMapReady(@NonNull GoogleMap map) {
+
         googleMap = map;
 
-        googleMap.getUiSettings().setZoomControlsEnabled(false);
+        googleMap.getUiSettings().setZoomControlsEnabled(true);
         googleMap.getUiSettings().setMyLocationButtonEnabled(true);
 
+        googleMap.setOnMarkerClickListener(marker -> {
+
+            if ("You".equals(marker.getTitle()))
+                return false;
+
+            selectedParkingName = marker.getTitle();
+            selectedParkingLocation = marker.getPosition();
+
+            parkingNameText.setText(selectedParkingName);
+
+            if (marker.getSnippet() != null) {
+                parkingInfoText.setText(marker.getSnippet());
+            }
+
+            btnNavigate.setEnabled(true);
+
+            return false;
+        });
+
         enableUserLocation();
+
     }
 
     private void enableUserLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
                 != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(
                     this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    LOCATION_PERMISSION_CODE
-            );
+                    new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION
+                    },
+                    LOCATION_PERMISSION_CODE);
+
             return;
         }
 
         googleMap.setMyLocationEnabled(true);
 
-        fusedLocationClient.getLastLocation().addOnSuccessListener(location -> {
-            if (location == null) {
-                Toast.makeText(this, "Please turn on GPS and reopen the app", Toast.LENGTH_LONG).show();
-                return;
-            }
+        fusedLocationClient.getLastLocation()
+                .addOnSuccessListener(location -> {
 
-            userLocation = new LatLng(location.getLatitude(), location.getLongitude());
+                    if (location == null)
+                        return;
 
-            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 16f));
+                    userLocation = new LatLng(
+                            location.getLatitude(),
+                            location.getLongitude());
 
-            findNearbyParking(userLocation);
-        });
+                    googleMap.animateCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                    userLocation,
+                                    16f));
+
+                    findNearbyParking(userLocation);
+
+                });
+
     }
 
     private void findNearbyParking(LatLng location) {
-        parkingCountText.setText("Searching parking near you...");
+
+        parkingCountText.setText("Searching parking...");
         parkingNameText.setText("Please wait...");
-        parkingInfoText.setText("Finding nearest parking...");
+        parkingInfoText.setText("");
 
         new Thread(() -> {
+
             try {
+
                 String urlString =
                         "https://maps.googleapis.com/maps/api/place/nearbysearch/json?"
                                 + "location=" + location.latitude + "," + location.longitude
@@ -148,13 +353,18 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 + "&key=" + GOOGLE_API_KEY;
 
                 URL url = new URL(urlString);
-                HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+
+                HttpURLConnection connection =
+                        (HttpURLConnection) url.openConnection();
+
                 connection.connect();
 
                 BufferedReader reader =
-                        new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                        new BufferedReader(
+                                new InputStreamReader(connection.getInputStream()));
 
                 StringBuilder json = new StringBuilder();
+
                 String line;
 
                 while ((line = reader.readLine()) != null) {
@@ -163,32 +373,93 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 reader.close();
 
-                JSONObject jsonObject = new JSONObject(json.toString());
-                String status = jsonObject.getString("status");
+                JSONObject object = new JSONObject(json.toString());
+
+                String status = object.getString("status");
 
                 if (!status.equals("OK")) {
+
                     runOnUiThread(() -> {
-                        parkingCountText.setText("No parking found nearby");
-                        parkingNameText.setText("Try another location");
-                        parkingInfoText.setText("Places API status: " + status);
-                        Toast.makeText(this, "No parking found: " + status, Toast.LENGTH_LONG).show();
+                        parkingCountText.setText("No parking found");
+                        parkingNameText.setText("-");
+                        parkingInfoText.setText(status);
+                        btnNavigate.setEnabled(false);
                     });
+
                     return;
                 }
 
-                JSONArray results = jsonObject.getJSONArray("results");
+                JSONArray results = object.getJSONArray("results");
 
+                runOnUiThread(() -> googleMap.clear());
+
+                // User marker
+                runOnUiThread(() -> {
+
+                    googleMap.addMarker(
+                            new MarkerOptions()
+                                    .position(location)
+                                    .title("You")
+                                    .icon(BitmapDescriptorFactory.defaultMarker(
+                                            BitmapDescriptorFactory.HUE_AZURE))
+                    );
+
+                });
+
+                // Add all parking markers
+                for (int i = 0; i < results.length(); i++) {
+
+                    JSONObject parking = results.getJSONObject(i);
+
+                    String name = parking.getString("name");
+
+                    JSONObject loc = parking.getJSONObject("geometry")
+                            .getJSONObject("location");
+
+                    double lat = loc.getDouble("lat");
+                    double lng = loc.getDouble("lng");
+
+                    LatLng parkingLocation = new LatLng(lat, lng);
+
+                    float[] distance = new float[1];
+
+                    Location.distanceBetween(
+                            location.latitude,
+                            location.longitude,
+                            lat,
+                            lng,
+                            distance
+                    );
+
+                    int meter = (int) distance[0];
+
+                    runOnUiThread(() -> {
+
+                        googleMap.addMarker(
+                                new MarkerOptions()
+                                        .position(parkingLocation)
+                                        .title(name)
+                                        .snippet(meter + " m away")
+                        );
+
+                    });
+
+                }
+
+                // Automatically choose first parking
                 JSONObject firstParking = results.getJSONObject(0);
 
                 selectedParkingName = firstParking.getString("name");
 
-                JSONObject geometry = firstParking.getJSONObject("geometry");
-                JSONObject parkingLoc = geometry.getJSONObject("location");
+                JSONObject firstLocation = firstParking
+                        .getJSONObject("geometry")
+                        .getJSONObject("location");
 
-                double parkingLat = parkingLoc.getDouble("lat");
-                double parkingLng = parkingLoc.getDouble("lng");
+                double parkingLat = firstLocation.getDouble("lat");
+                double parkingLng = firstLocation.getDouble("lng");
 
-                selectedParkingLocation = new LatLng(parkingLat, parkingLng);
+                selectedParkingLocation =
+                        new LatLng(parkingLat, parkingLng);
 
                 float[] distance = new float[1];
 
@@ -200,40 +471,40 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                         distance
                 );
 
-                int distanceMeter = Math.round(distance[0]);
+                int parkingDistance = (int) distance[0];
                 int parkingCount = results.length();
 
                 runOnUiThread(() -> {
-                    googleMap.clear();
 
-                    googleMap.addMarker(new MarkerOptions()
-                            .position(selectedParkingLocation)
-                            .title(selectedParkingName)
-                            .snippet(distanceMeter + " m away")
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED)));
+                    parkingCountText.setText(
+                            parkingCount + " parking locations found"
+                    );
 
-                    googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location, 16f));
-
-                    parkingCountText.setText(parkingCount + " parking spots found near you");
                     parkingNameText.setText(selectedParkingName);
-                    parkingInfoText.setText(distanceMeter + " m away • nearby parking available");
+
+                    parkingInfoText.setText(
+                            parkingDistance + " m away"
+                    );
 
                     btnNavigate.setEnabled(true);
+
                 });
 
             } catch (Exception e) {
+
                 e.printStackTrace();
 
-                runOnUiThread(() -> {
-                    parkingCountText.setText("Parking search failed");
-                    parkingNameText.setText("Error");
-                    parkingInfoText.setText(e.getMessage());
-                    Toast.makeText(this, "Parking API error: " + e.getMessage(), Toast.LENGTH_LONG).show();
-                });
+                runOnUiThread(() ->
+                        Toast.makeText(
+                                HomeActivity.this,
+                                e.getMessage(),
+                                Toast.LENGTH_LONG
+                        ).show());
+
             }
+
         }).start();
     }
-
     @Override
     public void onRequestPermissionsResult(
             int requestCode,
