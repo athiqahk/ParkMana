@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- Required by launcher icon -->
-    <color name="ic_launcher_background">#FFFFFF</color>
-
     <!-- ParkMana brand palette -->
     <color name="park_orange">#E8623D</color>
     <color name="park_orange_dark">#CF5331</color>
