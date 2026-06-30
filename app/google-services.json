@@ -14,6 +14,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "121356958914-6hgmf7p1oaevm9gdtm723cr03rn0jpqs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.parkmana",
+            "certificate_hash": "aba065f4fb32853e9629155accd262b1199689ff"
+          }
+        },
+        {
           "client_id": "121356958914-n0oq393c05r95o5ajnfpoitqudv2dr5b.apps.googleusercontent.com",
           "client_type": 3
         }

@@ -51,6 +51,21 @@ public class AuthViewModel extends ViewModel {
         });
     }
 
+    /** Signs into Firebase with a Google ID token; result flows through loginSuccess. */
+    public void signInWithGoogle(String idToken) {
+        loading.setValue(true);
+        repository.signInWithGoogle(idToken, new AuthRepository.AuthCallback() {
+            @Override public void onSuccess(FirebaseUser user) {
+                loading.setValue(false);
+                loginSuccess.setValue(user);
+            }
+            @Override public void onError(String message) {
+                loading.setValue(false);
+                errorMessage.setValue(message);
+            }
+        });
+    }
+
     public void forgotPassword(String email) {
         loading.setValue(true);
         repository.sendPasswordReset(email, new AuthRepository.AuthCallback() {
