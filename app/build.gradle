@@ -20,13 +20,17 @@ android {
     buildTypes {
         release {
             minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            proguardFiles getDefaultProguardFile(
+                    'proguard-android-optimize.txt'
+            ), 'proguard-rules.pro'
         }
     }
+
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_11
         targetCompatibility JavaVersion.VERSION_11
     }
+
     buildFeatures {
         viewBinding true
     }
@@ -34,37 +38,63 @@ android {
 
 dependencies {
 
-    // ---------- AndroidX core UI ----------
+    // =====================================================
+    // AndroidX
+    // =====================================================
     implementation libs.appcompat
     implementation libs.material
     implementation libs.constraintlayout
 
-    // ---------- Onboarding swipe pages ----------
-    // ViewPager2 powers the 3 swipeable onboarding screens.
+    // =====================================================
+    // Google Maps SDK
+    // =====================================================
+    implementation 'com.google.android.gms:play-services-maps:19.2.0'
+
+    // =====================================================
+    // GPS Location
+    // =====================================================
+    implementation 'com.google.android.gms:play-services-location:21.3.0'
+
+    // =====================================================
+    // Google Places SDK (NEW)
+    // =====================================================
+    implementation 'com.google.android.libraries.places:places:4.1.0'
+
+    // =====================================================
+    // ViewPager
+    // =====================================================
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
 
-    // ---------- MVVM (ViewModel + LiveData) ----------
+    // =====================================================
+    // Lifecycle
+    // =====================================================
     implementation libs.lifecycle.livedata.ktx
     implementation libs.lifecycle.viewmodel.ktx
 
-    // ---------- Navigation Component (single-activity navigation) ----------
+    // =====================================================
+    // Navigation Component
+    // =====================================================
     implementation libs.navigation.fragment
     implementation libs.navigation.ui
 
-    // ---------- Firebase ----------
-    // The BoM controls ALL Firebase library versions, so the individual
-    // Firebase dependencies below are declared WITHOUT a version number.
+    // =====================================================
+    // Firebase
+    // =====================================================
     implementation platform('com.google.firebase:firebase-bom:34.14.0')
     implementation 'com.google.firebase:firebase-auth'
     implementation 'com.google.firebase:firebase-firestore'
 
-    // ---------- Google Sign-In (Credential Manager) ----------
+    // =====================================================
+    // Google Sign In
+    // =====================================================
     implementation libs.credentials
     implementation libs.credentials.play.services.auth
     implementation libs.googleid
     implementation 'com.google.android.gms:play-services-auth:21.6.0'
 
-    // ---------- Testing ----------
+    // =====================================================
+    // Testing
+    // =====================================================
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core

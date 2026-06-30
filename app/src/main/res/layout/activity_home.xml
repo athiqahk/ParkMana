@@ -1,35 +1,260 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<!-- PAGE 1: Home Map / Nearby Parking UI -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="24dp">
+    android:layout_height="match_parent">
 
-    <TextView
-        android:id="@+id/welcomeText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="Home"
-        android:textColor="@color/park_text_primary"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toTopOf="@id/logoutButton"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_chainStyle="packed" />
+    <!-- Real Google Map background -->
+    <fragment
+        android:id="@+id/homeMap"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/logoutButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:text="Log out"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/welcomeText" />
+    <!-- Search bar -->
+    <AutoCompleteTextView
+        android:id="@+id/searchBar"
+        android:layout_width="match_parent"
+        android:layout_height="55dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="28dp"
+        android:layout_marginEnd="24dp"
+        android:background="@drawable/bg_white_rounded"
+        android:hint="🔍 Search parking, place..."
+        android:paddingStart="18dp"
+        android:paddingEnd="18dp"
+        android:textSize="14sp"
+        android:dropDownHeight="300dp"
+        android:dropDownVerticalOffset="5dp"
+        android:completionThreshold="1"/>
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <!-- Filter chips -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="38dp"
+        android:layout_marginStart="24dp"
+        android:layout_marginTop="90dp"
+        android:layout_marginEnd="24dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="115dp"
+            android:layout_height="32dp"
+            android:background="@drawable/bg_chip_red"
+            android:gravity="center"
+            android:text="L  Available now"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="85dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_chip_white"
+            android:gravity="center"
+            android:text="C  Covered"
+            android:textColor="#111111"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="105dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_chip_white"
+            android:gravity="center"
+            android:text="$  Under RM3"
+            android:textColor="#111111"
+            android:textSize="11sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Locate me button UI -->
+    <Button
+        android:id="@+id/btnLocateMe"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="end|bottom"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="250dp"
+        android:background="@drawable/bg_red_rounded"
+        android:text="⌾"
+        android:textColor="#FFFFFF"
+        android:textSize="24sp" />
+
+    <!-- Bottom card -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="245dp"
+        android:layout_gravity="bottom"
+        android:background="@drawable/bg_bottom_card"
+        android:orientation="vertical"
+        android:paddingStart="24dp"
+        android:paddingTop="20dp"
+        android:paddingEnd="24dp">
+
+        <!-- Header row -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nearby parking"
+                    android:textColor="#111111"
+                    android:textSize="18sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/parkingCountText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="5 spots with space near you"
+                    android:textColor="#777777"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="See all >"
+                android:textColor="#FF4B3E"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Parking detail card -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_white_rounded"
+            android:elevation="4dp"
+            android:orientation="horizontal"
+            android:padding="12dp">
+
+            <TextView
+                android:layout_width="58dp"
+                android:layout_height="58dp"
+                android:background="#FFE5E0"
+                android:gravity="center"
+                android:text=""
+                android:textSize="20sp" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="12dp"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/parkingNameText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Central Plaza Parking"
+                    android:textColor="#111111"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/parkingInfoText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="4 min  ·  4.7"
+                    android:textColor="#777777"
+                    android:textSize="11sp" />
+
+                <TextView
+                    android:layout_width="70dp"
+                    android:layout_height="22dp"
+                    android:layout_marginTop="5dp"
+                    android:background="#B9F5C8"
+                    android:gravity="center"
+                    android:text="48 free"
+                    android:textColor="#20A845"
+                    android:textSize="10sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="bottom"
+                android:text="RM3.00/"
+                android:textColor="#111111"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <!-- Navigate button overlay -->
+        <Button
+            android:id="@+id/btnNavigate"
+            android:layout_width="match_parent"
+            android:layout_height="42dp"
+            android:layout_marginStart="12dp"
+            android:layout_marginTop="-45dp"
+            android:layout_marginEnd="70dp"
+            android:background="@drawable/bg_red_rounded"
+            android:text="^  Navigate"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- Bottom menu UI only -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="65dp"
+            android:layout_marginTop="20dp"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="▥\nHome"
+                android:textColor="#FF4B3E"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="♡\nSaved"
+                android:textColor="#505A66"
+                android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="♢\nAlerts"
+                android:textColor="#505A66"
+                android:textSize="11sp" />
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="♙\nProfile"
+                android:textColor="#505A66"
+                android:textSize="11sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</FrameLayout>
