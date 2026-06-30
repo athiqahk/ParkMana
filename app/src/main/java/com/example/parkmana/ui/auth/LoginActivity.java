@@ -58,15 +58,8 @@ public class LoginActivity extends AppCompatActivity {
     private void setupClicks() {
         binding.btnLogin.setOnClickListener(v -> attemptLogin());
 
-        binding.tvForgotPassword.setOnClickListener(v -> {
-            String email = text(binding.emailInput);
-            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-                binding.emailLayout.setError("Enter your email first to reset the password");
-                return;
-            }
-            binding.emailLayout.setError(null);
-            viewModel.forgotPassword(email);
-        });
+        binding.tvForgotPassword.setOnClickListener(v ->
+                startActivity(new Intent(this, ForgotPasswordActivity.class)));
 
         binding.btnGoogle.setOnClickListener(v -> startGoogleSignIn());
     }
