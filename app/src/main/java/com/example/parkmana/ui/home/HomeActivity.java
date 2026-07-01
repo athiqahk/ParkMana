@@ -15,8 +15,10 @@ import androidx.core.app.ActivityCompat;
 
 import com.example.parkmana.R;
 import com.example.parkmana.ui.navigation.NavigationActivity;
+import com.google.android.gms.tasks.CancellationTokenSource;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.Priority;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -57,7 +59,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final int LOCATION_PERMISSION_CODE = 100;
 
-    private static final String GOOGLE_API_KEY = "AIzaSyBil5a0ILtVvwX8la3e9Pii9LYWZy_8k6s";
+    private static final String GOOGLE_API_KEY = "Your_API_Key";
 
     private GoogleMap googleMap;
     private FusedLocationProviderClient fusedLocationClient;
@@ -125,6 +127,9 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Search
         //========================
         initializeSearch();
+
+        findViewById(R.id.btnLocateMe).setOnClickListener(v ->
+                recenterOnCurrentLocation());
 
         //========================
         // Navigate Button
@@ -333,6 +338,58 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                 });
 
+    }
+
+    private void recenterOnCurrentLocation() {
+
+        if (ActivityCompat.checkSelfPermission(
+                this,
+                Manifest.permission.ACCESS_FINE_LOCATION)
+                != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                    this,
+                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
+                    LOCATION_PERMISSION_CODE);
+            return;
+        }
+
+        CancellationTokenSource cancellationTokenSource =
+                new CancellationTokenSource();
+
+        fusedLocationClient.getCurrentLocation(
+                        Priority.PRIORITY_HIGH_ACCURACY,
+                        cancellationTokenSource.getToken())
+                .addOnSuccessListener(location -> {
+
+                    if (location != null) {
+                        userLocation = new LatLng(
+                                location.getLatitude(),
+                                location.getLongitude());
+
+                        googleMap.animateCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                        userLocation,
+                                        16f));
+                    } else if (userLocation != null) {
+                        googleMap.animateCamera(
+                                CameraUpdateFactory.newLatLngZoom(
+                                        userLocation,
+                                        16f));
+                    } else {
+                        Toast.makeText(
+                                this,
+                                "Current location is not available yet.",
+                                Toast.LENGTH_SHORT
+                        ).show();
+                    }
+                })
+                .addOnFailureListener(error ->
+                        Toast.makeText(
+                                this,
+                                "Unable to get current location.",
+                                Toast.LENGTH_SHORT
+                        ).show());
     }
 
     private void findNearbyParking(LatLng location) {
