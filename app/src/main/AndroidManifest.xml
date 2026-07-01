@@ -19,7 +19,7 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="Your_API_KEY" />
+            android:value="Your_API_Key" />
 
         <activity
             android:name=".ui.splash.SplashActivity"
@@ -34,6 +34,8 @@
         <activity android:name=".MainActivity" android:exported="false" />
 
         <activity android:name=".ui.home.HomeActivity" android:exported="false" />
+
+        <activity android:name=".ui.parking.ParkingListActivity" android:exported="false" />
 
         <activity android:name=".ui.navigation.NavigationActivity" android:exported="false" />
 
