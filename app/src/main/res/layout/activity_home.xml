@@ -230,6 +230,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/menuSaved"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
@@ -248,6 +249,7 @@
                 android:textSize="11sp" />
 
             <TextView
+                android:id="@+id/menuProfile"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_weight="1"

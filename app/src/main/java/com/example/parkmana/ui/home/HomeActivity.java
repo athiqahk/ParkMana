@@ -54,6 +54,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import com.example.parkmana.ui.profile.ProfileActivity;
+import com.example.parkmana.ui.favourites.FavouritesActivity;
+
 /**
  * PAGE 1:
  * Shows user's current location and searches nearby parking using Google Places API.
@@ -62,7 +65,8 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private static final int LOCATION_PERMISSION_CODE = 100;
 
-    private static final String GOOGLE_API_KEY = "Your_API_Key\n";
+    //private static final String GOOGLE_API_KEY = "${MAPS_API_KEY}";
+    private static final String GOOGLE_API_KEY = com.example.parkmana.BuildConfig.MAPS_API_KEY;
 
     private GoogleMap googleMap;
     private FusedLocationProviderClient fusedLocationClient;
@@ -138,6 +142,12 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         findViewById(R.id.btnLocateMe).setOnClickListener(v ->
                 recenterOnCurrentLocation());
+
+        findViewById(R.id.menuProfile).setOnClickListener(v ->
+                startActivity(new Intent(this, ProfileActivity.class)));
+
+        findViewById(R.id.menuSaved).setOnClickListener(v ->
+                startActivity(new Intent(this, FavouritesActivity.class)));
 
         //========================
         // Navigate Button

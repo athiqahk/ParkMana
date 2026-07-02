@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.parkmana.R;
-import com.example.parkmana.ui.navigation.NavigationActivity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -82,7 +81,7 @@ public class ParkingListActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.parkingRecyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        adapter = new ParkingAdapter(this::openNavigation);
+        adapter = new ParkingAdapter(this::openParkingDetails);
         recyclerView.setAdapter(adapter);
     }
 
@@ -150,13 +149,11 @@ public class ParkingListActivity extends AppCompatActivity {
         chip.setTextColor(selected ? Color.WHITE : Color.parseColor("#222222"));
     }
 
-    private void openNavigation(ParkingItem parking) {
-        Intent intent = new Intent(this, NavigationActivity.class);
-        intent.putExtra("user_lat", userLatitude);
-        intent.putExtra("user_lng", userLongitude);
-        intent.putExtra("parking_lat", parking.getLatitude());
-        intent.putExtra("parking_lng", parking.getLongitude());
-        intent.putExtra("parking_name", parking.getName());
+    private void openParkingDetails(ParkingItem parking) {
+        Intent intent = new Intent(this, ParkingDetailsActivity.class);
+        intent.putExtra(ParkingDetailsActivity.EXTRA_PARKING_ITEM, parking);
+        intent.putExtra(ParkingDetailsActivity.EXTRA_USER_LAT, userLatitude);
+        intent.putExtra(ParkingDetailsActivity.EXTRA_USER_LNG, userLongitude);
         startActivity(intent);
     }
 }
