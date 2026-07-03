@@ -5,6 +5,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import android.content.Intent;
 import android.net.Uri;
@@ -66,6 +67,10 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
         topParkingName.setText(parkingName);
         parkingNameText.setText(parkingName);
 
+        // Return to the screen that opened navigation and preserve its state.
+        findViewById(R.id.cancelNavigationButton)
+                .setOnClickListener(view -> finish());
+
         startNavigationButton.setOnClickListener(v -> {
 
             Uri gmmIntentUri = Uri.parse(
@@ -81,6 +86,10 @@ public class NavigationActivity extends AppCompatActivity implements OnMapReadyC
 
             if (mapIntent.resolveActivity(getPackageManager()) != null) {
                 startActivity(mapIntent);
+            } else {
+                Toast.makeText(this,
+                        "Google Maps is not installed on this device.",
+                        Toast.LENGTH_LONG).show();
             }
 
         });
