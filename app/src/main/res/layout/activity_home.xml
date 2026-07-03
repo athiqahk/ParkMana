@@ -28,47 +28,6 @@
         android:dropDownVerticalOffset="5dp"
         android:completionThreshold="1"/>
 
-    <!-- Filter chips -->
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="38dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="90dp"
-        android:layout_marginEnd="24dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:layout_width="115dp"
-            android:layout_height="32dp"
-            android:background="@drawable/bg_chip_red"
-            android:gravity="center"
-            android:text="L  Available now"
-            android:textColor="#FFFFFF"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="85dp"
-            android:layout_height="32dp"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/bg_chip_white"
-            android:gravity="center"
-            android:text="C  Covered"
-            android:textColor="#111111"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="105dp"
-            android:layout_height="32dp"
-            android:layout_marginStart="8dp"
-            android:background="@drawable/bg_chip_white"
-            android:gravity="center"
-            android:text="$  Under RM3"
-            android:textColor="#111111"
-            android:textSize="11sp"
-            android:textStyle="bold" />
-    </LinearLayout>
 
     <!-- Locate me button UI -->
     <Button
@@ -143,19 +102,37 @@
             android:orientation="horizontal"
             android:padding="12dp">
 
-            <TextView
-                android:layout_width="58dp"
-                android:layout_height="58dp"
-                android:background="#FFE5E0"
-                android:gravity="center"
-                android:text=""
-                android:textSize="20sp" />
+            <!-- Parking photo from Google Places Photo API, with P fallback -->
+            <FrameLayout
+                android:layout_width="72dp"
+                android:layout_height="72dp">
+
+                <TextView
+                    android:id="@+id/parkingImagePlaceholder"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#FFE5E0"
+                    android:gravity="center"
+                    android:text="P"
+                    android:textColor="#FF4B3E"
+                    android:textSize="24sp"
+                    android:textStyle="bold" />
+
+                <ImageView
+                    android:id="@+id/parkingImageView"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:scaleType="centerCrop"
+                    android:visibility="gone"
+                    android:contentDescription="Parking photo" />
+            </FrameLayout>
 
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="12dp"
                 android:layout_weight="1"
+                android:gravity="center_vertical"
                 android:orientation="vertical">
 
                 <TextView
@@ -165,36 +142,19 @@
                     android:text="Central Plaza Parking"
                     android:textColor="#111111"
                     android:textSize="14sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:maxLines="2"
+                    android:ellipsize="end" />
 
                 <TextView
                     android:id="@+id/parkingInfoText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="4 min  ·  4.7"
+                    android:layout_marginTop="4dp"
+                    android:text="4 min  ·  ★ 4.7"
                     android:textColor="#777777"
                     android:textSize="11sp" />
-
-                <TextView
-                    android:layout_width="70dp"
-                    android:layout_height="22dp"
-                    android:layout_marginTop="5dp"
-                    android:background="#B9F5C8"
-                    android:gravity="center"
-                    android:text="48 free"
-                    android:textColor="#20A845"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
             </LinearLayout>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:gravity="bottom"
-                android:text="RM3.00/"
-                android:textColor="#111111"
-                android:textSize="15sp"
-                android:textStyle="bold" />
         </LinearLayout>
 
         <!-- Static navigation action; space stays reserved while invisible -->
@@ -212,52 +172,12 @@
             android:textStyle="bold"
             android:visibility="invisible" />
 
-        <!-- Bottom menu UI only -->
-        <LinearLayout
+        <!-- Shared bottom navigation -->
+        <include
+            layout="@layout/layout_bottom_nav"
             android:layout_width="match_parent"
-            android:layout_height="65dp"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="▥\nHome"
-                android:textColor="#FF4B3E"
-                android:textSize="11sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/menuSaved"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="♡\nSaved"
-                android:textColor="#505A66"
-                android:textSize="11sp" />
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="♢\nAlerts"
-                android:textColor="#505A66"
-                android:textSize="11sp" />
-
-            <TextView
-                android:id="@+id/menuProfile"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="♙\nProfile"
-                android:textColor="#505A66"
-                android:textSize="11sp" />
-        </LinearLayout>
+            android:layout_height="64dp"
+            android:layout_marginTop="6dp" />
 
     </LinearLayout>
 

@@ -2,6 +2,12 @@ package com.example.parkmana.ui.parking;
 
 import java.io.Serializable;
 
+/**
+ * Parking place model passed between activities.
+ * NOTE: constructor and getters match the existing usage in HomeActivity,
+ * ParkingListActivity and ParkingDetailsActivity. photoReference is new —
+ * it carries the Google Places photo reference for list thumbnails.
+ */
 public class ParkingItem implements Serializable {
 
     private final String name;
@@ -12,17 +18,16 @@ public class ParkingItem implements Serializable {
     private final double rating;
     private final int ratingCount;
     private final Boolean openNow;
+    private String photoReference;
 
-    public ParkingItem(
-            String name,
-            String address,
-            double latitude,
-            double longitude,
-            int distanceMeters,
-            double rating,
-            int ratingCount,
-            Boolean openNow
-    ) {
+    public ParkingItem(String name,
+                       String address,
+                       double latitude,
+                       double longitude,
+                       int distanceMeters,
+                       double rating,
+                       int ratingCount,
+                       Boolean openNow) {
         this.name = name;
         this.address = address;
         this.latitude = latitude;
@@ -63,5 +68,13 @@ public class ParkingItem implements Serializable {
 
     public Boolean getOpenNow() {
         return openNow;
+    }
+
+    public String getPhotoReference() {
+        return photoReference;
+    }
+
+    public void setPhotoReference(String photoReference) {
+        this.photoReference = photoReference;
     }
 }

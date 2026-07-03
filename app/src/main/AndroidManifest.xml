@@ -58,6 +58,8 @@
 
         <activity android:name=".ui.favourites.FavouritesActivity" android:exported="false" />
 
+        <activity android:name=".ui.profile.MyPhotosActivity" android:exported="false" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"

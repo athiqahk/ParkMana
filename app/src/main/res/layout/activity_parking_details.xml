@@ -139,6 +139,7 @@
                 android:scaleType="centerCrop"
                 android:visibility="gone" />
 
+
             <TextView
                 android:id="@+id/parkingPhotoStatus"
                 android:layout_width="match_parent"
@@ -148,6 +149,24 @@
                 android:text="No photo added yet"
                 android:textColor="#666666"
                 android:textSize="12sp" />
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/parkingPhotoDescriptionLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:hint="Photo description">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/parkingPhotoDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textCapSentences|textMultiLine"
+                    android:maxLength="300"
+                    android:maxLines="4" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <Button
                 android:id="@+id/parkingAddPhotoButton"

@@ -102,5 +102,8 @@ dependencies {
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+
+    // Loads the Google parking photos on the home card
+    implementation 'com.github.bumptech.glide:glide:4.16.0'
 }
 

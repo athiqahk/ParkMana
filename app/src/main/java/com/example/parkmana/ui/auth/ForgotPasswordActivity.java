@@ -17,6 +17,7 @@ import com.google.android.material.textfield.TextInputEditText;
  * Reuses AuthViewModel.forgotPassword(), which sends the reset email via
  * Firebase. On success we tell the user to check their inbox and close.
  */
+
 public class ForgotPasswordActivity extends AppCompatActivity {
 
     private ActivityForgotPasswordBinding binding;

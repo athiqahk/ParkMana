@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -56,6 +57,7 @@ public class ParkingDetailsActivity extends AppCompatActivity {
 
     private ImageView photoPreview;
     private TextView uploadStatus;
+    private EditText photoDescription;
     private Button favouriteButton;
 
     private final ActivityResultLauncher<String> cameraPermissionLauncher =
@@ -114,6 +116,7 @@ public class ParkingDetailsActivity extends AppCompatActivity {
     private void bindViews() {
         photoPreview = findViewById(R.id.parkingPhotoPreview);
         uploadStatus = findViewById(R.id.parkingPhotoStatus);
+        photoDescription = findViewById(R.id.parkingPhotoDescription);
         favouriteButton = findViewById(R.id.parkingFavouriteButton);
     }
 
@@ -196,6 +199,8 @@ public class ParkingDetailsActivity extends AppCompatActivity {
             photoData.put("parkingLatitude", parking.getLatitude());
             photoData.put("parkingLongitude", parking.getLongitude());
             photoData.put("imageBase64", base64Image);
+            photoData.put("description",
+                    photoDescription.getText().toString().trim());
             photoData.put("createdAt", FieldValue.serverTimestamp());
 
             photoDocument(user).set(photoData)
@@ -221,6 +226,12 @@ public class ParkingDetailsActivity extends AppCompatActivity {
                     photoPreview.setImageBitmap(
                             BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
                     photoPreview.setVisibility(View.VISIBLE);
+
+                    String description = document.getString("description");
+                    if (description != null) {
+                        photoDescription.setText(description);
+                    }
+
                     uploadStatus.setText("Your photo for this parking");
                 });
     }

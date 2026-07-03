@@ -3,11 +3,14 @@ package com.example.parkmana.ui.parking;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.example.parkmana.BuildConfig;
 import com.example.parkmana.R;
 
 import java.util.ArrayList;
@@ -78,6 +81,23 @@ public class ParkingAdapter extends RecyclerView.Adapter<ParkingAdapter.ParkingV
             holder.status.setBackgroundResource(R.drawable.bg_red_label);
         }
 
+        // Google photo, with P badge fallback
+        String reference = item.getPhotoReference();
+        if (reference == null || reference.isEmpty()) {
+            holder.image.setVisibility(View.GONE);
+            holder.imagePlaceholder.setVisibility(View.VISIBLE);
+        } else {
+            holder.imagePlaceholder.setVisibility(View.GONE);
+            holder.image.setVisibility(View.VISIBLE);
+            String photoUrl = "https://maps.googleapis.com/maps/api/place/photo?"
+                    + "maxwidth=200&photo_reference=" + reference
+                    + "&key=" + BuildConfig.MAPS_API_KEY;
+            Glide.with(holder.itemView)
+                    .load(photoUrl)
+                    .centerCrop()
+                    .into(holder.image);
+        }
+
         holder.itemView.setOnClickListener(v -> listener.onParkingClick(item));
     }
 
@@ -94,6 +114,8 @@ public class ParkingAdapter extends RecyclerView.Adapter<ParkingAdapter.ParkingV
     }
 
     static class ParkingViewHolder extends RecyclerView.ViewHolder {
+        final ImageView image;
+        final TextView imagePlaceholder;
         final TextView name;
         final TextView address;
         final TextView distance;
@@ -102,6 +124,8 @@ public class ParkingAdapter extends RecyclerView.Adapter<ParkingAdapter.ParkingV
 
         ParkingViewHolder(@NonNull View itemView) {
             super(itemView);
+            image = itemView.findViewById(R.id.parkingItemImage);
+            imagePlaceholder = itemView.findViewById(R.id.parkingItemImagePlaceholder);
             name = itemView.findViewById(R.id.parkingItemName);
             address = itemView.findViewById(R.id.parkingItemAddress);
             distance = itemView.findViewById(R.id.parkingItemDistance);
