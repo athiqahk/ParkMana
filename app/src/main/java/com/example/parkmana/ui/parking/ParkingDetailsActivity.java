@@ -9,9 +9,10 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.util.Base64;
+import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,6 +55,8 @@ import java.util.Map;
 
 public class ParkingDetailsActivity extends AppCompatActivity {
 
+    private static final String TAG = "ParkingDetails";
+
     public static final String EXTRA_PARKING_ITEM = "parking_item";
     public static final String EXTRA_USER_LAT = "user_lat";
     public static final String EXTRA_USER_LNG = "user_lng";
@@ -72,7 +75,7 @@ public class ParkingDetailsActivity extends AppCompatActivity {
     private ImageView photoPreview;
     private TextView uploadStatus;
     private EditText photoDescription;
-    private Button favouriteButton;
+    private ImageButton favouriteButton;
 
     private RecyclerView reviewsRecyclerView;
     private TextView reviewsCountLabel;
@@ -183,7 +186,11 @@ public class ParkingDetailsActivity extends AppCompatActivity {
     }
 
     // =====================================================
-    // Google reviews for the currently opened parking location
+    // Google reviews for the currently opened parking location — shown
+    // entirely in-app via the RecyclerView below. Note: Google's Places
+    // API caps review data at a maximum of 5 "most relevant" reviews per
+    // place, with no pagination for more — that's a platform limit, so
+    // this list is the full extent of what's available through the API.
     // =====================================================
 
     private void setupReviews() {
@@ -249,8 +256,13 @@ public class ParkingDetailsActivity extends AppCompatActivity {
                     reviewsRecyclerView.setVisibility(View.VISIBLE);
                     reviewsAdapter.submit(items);
                 })
-                .addOnFailureListener(error ->
-                        showReviewsMessage("Could not load reviews: " + readableMessage(error)));
+                .addOnFailureListener(error -> {
+                    // Logged so a genuine failure (API not enabled, quota,
+                    // bad key restriction, etc.) is visible in Logcat instead
+                    // of looking identical to "the place just has no reviews".
+                    Log.e(TAG, "fetchPlace(REVIEWS) failed for placeId=" + placeId, error);
+                    showReviewsMessage("Could not load reviews: " + readableMessage(error));
+                });
     }
 
     private void showReviewsMessage(String message) {
@@ -308,6 +320,8 @@ public class ParkingDetailsActivity extends AppCompatActivity {
                     }
                 })
                 .addOnFailureListener(error -> {
+                    Log.e(TAG, "Loading parking_reports failed for parkingId="
+                            + parkingId(), error);
                     reportsEmptyLabel.setText(
                             "Could not load updates: " + readableMessage(error));
                     reportsEmptyLabel.setVisibility(View.VISIBLE);
@@ -349,7 +363,9 @@ public class ParkingDetailsActivity extends AppCompatActivity {
      * Posts a shared update visible to every user who opens this parking
      * spot (not a private per-user photo). The uploader's display name and
      * server timestamp are stored alongside it so others can see who
-     * reported it and when.
+     * reported it and when. The same document is what MyPhotosActivity
+     * queries (filtered by uploaderUid) to show a user's own private
+     * history of what they've posted.
      */
     private void postReport(Uri photoUri) {
         FirebaseUser user = currentUser();
@@ -387,8 +403,10 @@ public class ParkingDetailsActivity extends AppCompatActivity {
                         photoPreview.setVisibility(View.GONE);
                         refreshReports();
                     })
-                    .addOnFailureListener(error ->
-                            uploadStatus.setText("Could not post update: " + readableMessage(error)));
+                    .addOnFailureListener(error -> {
+                        Log.e(TAG, "Posting parking_reports failed", error);
+                        uploadStatus.setText("Could not post update: " + readableMessage(error));
+                    });
         } catch (IOException error) {
             uploadStatus.setText("Could not read the photo: " + readableMessage(error));
         }
@@ -484,8 +502,16 @@ public class ParkingDetailsActivity extends AppCompatActivity {
                 .collection("favourites").document(parkingId());
     }
 
+    /**
+     * Swaps between the outline heart (not saved) and the solid red heart
+     * (saved) — two separate drawables, no runtime tinting, so the shape
+     * never gets stretched or double-drawn.
+     */
     private void updateFavouriteButton() {
-        favouriteButton.setText(isFavourite ? "♥" : "♡");
+        favouriteButton.setImageResource(
+                isFavourite ? R.drawable.ic_favourite_filled : R.drawable.ic_favourite_outline);
+        favouriteButton.setContentDescription(
+                isFavourite ? "Remove from favourites" : "Add to favourites");
     }
 
     // =====================================================

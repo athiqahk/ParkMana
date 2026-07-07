@@ -21,7 +21,7 @@
             android:layout_height="44dp"
             android:gravity="center"
             android:text="&lt;"
-            android:textColor="#222222"
+            android:textColor="#2D3436"
             android:textSize="24sp"
             android:textStyle="bold" />
 
@@ -30,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="Parking Details"
-            android:textColor="#111111"
+            android:textColor="#2D3436"
             android:textSize="19sp"
             android:textStyle="bold" />
     </LinearLayout>
@@ -51,7 +51,7 @@
                 android:id="@+id/parkingDetailsName"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textColor="#111111"
+                android:textColor="#2D3436"
                 android:textSize="22sp"
                 android:textStyle="bold" />
 
@@ -60,7 +60,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
-                android:textColor="#666666"
+                android:textColor="#6B7580"
                 android:textSize="13sp" />
 
             <LinearLayout
@@ -74,7 +74,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:textColor="#555555"
+                    android:textColor="#4A5560"
                     android:textSize="13sp"
                     android:textStyle="bold" />
 
@@ -96,21 +96,23 @@
                 android:paddingTop="6dp"
                 android:paddingEnd="12dp"
                 android:paddingBottom="6dp"
-                android:textColor="#444444"
+                android:textColor="#4A5560"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 
-            <!-- Primary action: Navigate (promoted) + compact Favourite toggle -->
+            <!-- ============== Primary actions: Navigate + Favourite ============== -->
+
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="52dp"
+                android:layout_height="wrap_content"
                 android:layout_marginTop="18dp"
+                android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <androidx.appcompat.widget.AppCompatButton
+                <Button
                     android:id="@+id/parkingDetailsNavigateButton"
                     android:layout_width="0dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="52dp"
                     android:layout_weight="1"
                     android:background="@drawable/bg_red_rounded"
                     android:text="Navigate to Parking"
@@ -119,33 +121,37 @@
                     android:textSize="14sp"
                     android:textStyle="bold" />
 
-                <androidx.appcompat.widget.AppCompatButton
+                <ImageButton
                     android:id="@+id/parkingFavouriteButton"
                     android:layout_width="52dp"
-                    android:layout_height="match_parent"
+                    android:layout_height="52dp"
                     android:layout_marginStart="10dp"
                     android:background="@drawable/bg_white_rounded"
-                    android:minWidth="0dp"
-                    android:padding="0dp"
-                    android:text="♡"
-                    android:textAllCaps="false"
-                    android:textColor="#FF4B3E"
-                    android:textSize="20sp" />
+                    android:contentDescription="Add to favourites"
+                    android:padding="12dp"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_favourite_outline" />
             </LinearLayout>
 
-            <!-- Reviews (Google) -->
+            <!-- ===================== Google Reviews section ===================== -->
+            <!-- Shown fully in-app. Google's Places API caps this at a max of
+                 5 "most relevant" reviews per place with no pagination — that
+                 is the full extent of what's fetchable, by design of the API
+                 itself, not a limitation of this screen. -->
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="28dp"
+                android:layout_marginTop="26dp"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
+                    android:layout_weight="1"
                     android:text="Reviews"
-                    android:textColor="#111111"
+                    android:textColor="#2D3436"
                     android:textSize="17sp"
                     android:textStyle="bold" />
 
@@ -153,10 +159,8 @@
                     android:id="@+id/reviewsCountLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginStart="6dp"
-                    android:textColor="#999999"
+                    android:textColor="#8A94A0"
                     android:textSize="13sp" />
-
             </LinearLayout>
 
             <TextView
@@ -165,25 +169,25 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp"
-                android:text="Reviews unavailable for this location"
-                android:textColor="#888888"
-                android:textSize="13sp" />
+                android:text="Loading reviews..."
+                android:textColor="#8A94A0"
+                android:textSize="12sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/parkingReviewsRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="12dp"
+                android:nestedScrollingEnabled="false" />
 
-            <!-- Community Updates (shared, driver-submitted) -->
+            <!-- =================== Community Updates section =================== -->
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="28dp"
-                android:text="Community Updates"
-                android:textColor="#111111"
+                android:text="Updates from drivers"
+                android:textColor="#2D3436"
                 android:textSize="17sp"
                 android:textStyle="bold" />
 
@@ -191,8 +195,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:text="Reported by drivers who've been here recently — blocked entrances, wrong hours, or other updates Google may not have."
-                android:textColor="#666666"
+                android:text="Roadblocks, closed entrances, or hours Google hasn't caught up on yet."
+                android:textColor="#6B7580"
                 android:textSize="12sp" />
 
             <TextView
@@ -201,58 +205,61 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:gravity="center"
-                android:paddingTop="14dp"
-                android:paddingBottom="14dp"
-                android:text="No updates yet. Be the first to help other drivers."
-                android:textColor="#888888"
-                android:textSize="13sp" />
+                android:text="Loading updates..."
+                android:textColor="#8A94A0"
+                android:textSize="12sp" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/parkingReportsRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp" />
+                android:layout_marginTop="12dp"
+                android:nestedScrollingEnabled="false" />
 
-            <!-- Compose box: post a shared update -->
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="20dp"
-                android:background="#E5E5E5" />
+            <!-- ===================== Post an update (compose) ===================== -->
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="20dp"
                 android:text="Post an update"
-                android:textColor="#111111"
-                android:textSize="17sp"
+                android:textColor="#2D3436"
+                android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
-                android:text="Snap a photo and describe what other drivers should know."
-                android:textColor="#666666"
-                android:textSize="12sp" />
+                android:layout_marginTop="2dp"
+                android:text="Your name and the time will be shown with your post."
+                android:textColor="#8A94A0"
+                android:textSize="11sp" />
 
             <ImageView
                 android:id="@+id/parkingPhotoPreview"
                 android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:layout_marginTop="14dp"
+                android:layout_height="180dp"
+                android:layout_marginTop="10dp"
                 android:background="#E6E8EA"
                 android:contentDescription="Captured parking photo"
                 android:scaleType="centerCrop"
                 android:visibility="gone" />
 
+            <TextView
+                android:id="@+id/parkingPhotoStatus"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:textColor="#6B7580"
+                android:textSize="12sp" />
+
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/parkingPhotoDescriptionLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:hint="What's happening here?">
+                android:layout_marginTop="10dp"
+                android:hint="What's going on? (e.g. entrance blocked)">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/parkingPhotoDescription"
@@ -264,24 +271,14 @@
 
             </com.google.android.material.textfield.TextInputLayout>
 
-            <TextView
-                android:id="@+id/parkingPhotoStatus"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:text="No photo added yet"
-                android:textColor="#666666"
-                android:textSize="12sp" />
-
-            <androidx.appcompat.widget.AppCompatButton
+            <Button
                 android:id="@+id/parkingAddPhotoButton"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:layout_marginTop="12dp"
                 android:layout_marginBottom="20dp"
                 android:background="@drawable/bg_red_rounded"
-                android:text="Take Photo &amp; Post Update"
+                android:text="Add Photo &amp; Post Update"
                 android:textAllCaps="false"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"

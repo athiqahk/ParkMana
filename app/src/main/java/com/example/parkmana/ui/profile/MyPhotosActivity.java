@@ -2,6 +2,7 @@ package com.example.parkmana.ui.profile;
 
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -18,13 +19,33 @@ import com.example.parkmana.ui.BottomNavHelper;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Shows the signed-in user's own posted parking updates — a private view
+ * of their own uploads, filtered from the shared parking_reports collection
+ * by uploaderUid. Other users' reports never appear here even though the
+ * collection itself is readable by anyone (that's what makes them visible
+ * on ParkingDetailsActivity for everyone).
+ *
+ * NOTE: whereEqualTo("uploaderUid", ...) + orderBy("createdAt", ...) is a
+ * *different* field combination than the parkingId + createdAt query used
+ * in ParkingDetailsActivity, so it needs its own separate Firestore
+ * composite index. If this screen shows "Could not load photos", check
+ * Logcat (tag "MyPhotos") for a FAILED_PRECONDITION error containing a
+ * direct link to create that index — or create it manually in Firebase
+ * Console → Firestore → Indexes: collection "parking_reports",
+ * fields uploaderUid (Ascending) + createdAt (Descending).
+ */
 public class MyPhotosActivity extends AppCompatActivity {
+
+    private static final String TAG = "MyPhotos";
+    private static final String REPORTS_COLLECTION = "parking_reports";
 
     private PhotoAdapter adapter;
     private TextView emptyText;
@@ -62,8 +83,9 @@ public class MyPhotosActivity extends AppCompatActivity {
         }
 
         FirebaseFirestore.getInstance()
-                .collection("users").document(user.getUid())
-                .collection("parking_photos")
+                .collection(REPORTS_COLLECTION)
+                .whereEqualTo("uploaderUid", user.getUid())
+                .orderBy("createdAt", Query.Direction.DESCENDING)
                 .get()
                 .addOnSuccessListener(snapshot -> {
                     List<ParkingPhoto> items = new ArrayList<>();
@@ -77,8 +99,17 @@ public class MyPhotosActivity extends AppCompatActivity {
                     });
                     showItems(items);
                 })
-                .addOnFailureListener(error -> Toast.makeText(this,
-                        "Could not load photos.", Toast.LENGTH_SHORT).show());
+                .addOnFailureListener(error -> {
+                    // Surfacing the real error (usually FAILED_PRECONDITION
+                    // with an index-creation link) instead of hiding it
+                    // behind a generic message.
+                    Log.e(TAG, "Loading parking_reports by uploaderUid failed", error);
+                    Toast.makeText(this,
+                            "Could not load photos: " + readableMessage(error),
+                            Toast.LENGTH_LONG).show();
+                    emptyText.setText("Could not load photos: " + readableMessage(error));
+                    emptyText.setVisibility(View.VISIBLE);
+                });
     }
 
     private void showItems(List<ParkingPhoto> items) {
@@ -111,8 +142,7 @@ public class MyPhotosActivity extends AppCompatActivity {
                     update.put("description", input.getText().toString().trim());
 
                     FirebaseFirestore.getInstance()
-                            .collection("users").document(user.getUid())
-                            .collection("parking_photos").document(photo.id)
+                            .collection(REPORTS_COLLECTION).document(photo.id)
                             .update(update)
                             .addOnSuccessListener(unused -> loadPhotos())
                             .addOnFailureListener(error -> Toast.makeText(this,
@@ -134,8 +164,7 @@ public class MyPhotosActivity extends AppCompatActivity {
                     if (user == null) return;
 
                     FirebaseFirestore.getInstance()
-                            .collection("users").document(user.getUid())
-                            .collection("parking_photos").document(photo.id)
+                            .collection(REPORTS_COLLECTION).document(photo.id)
                             .delete()
                             .addOnSuccessListener(unused -> loadPhotos())
                             .addOnFailureListener(error -> Toast.makeText(this,
@@ -144,5 +173,10 @@ public class MyPhotosActivity extends AppCompatActivity {
                 })
                 .setNegativeButton("Cancel", null)
                 .show();
+    }
+
+    private String readableMessage(Exception error) {
+        String message = error.getMessage();
+        return message == null || message.trim().isEmpty() ? "please try again" : message;
     }
 }
