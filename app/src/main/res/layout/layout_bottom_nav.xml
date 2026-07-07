@@ -36,20 +36,6 @@
         android:textSize="11sp" />
 
     <TextView
-        android:id="@+id/menuAlerts"
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:drawableTop="@drawable/ic_nav_alerts"
-        android:drawablePadding="2dp"
-        android:gravity="center"
-        android:paddingTop="10dp"
-        android:paddingBottom="10dp"
-        android:text="Alerts"
-        android:textColor="#505A66"
-        android:textSize="11sp" />
-
-    <TextView
         android:id="@+id/menuProfile"
         android:layout_width="0dp"
         android:layout_height="match_parent"

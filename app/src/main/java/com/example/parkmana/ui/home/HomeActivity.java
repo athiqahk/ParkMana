@@ -20,6 +20,7 @@ import com.example.parkmana.BuildConfig;
 import com.example.parkmana.R;
 import com.example.parkmana.ui.BottomNavHelper;
 import com.example.parkmana.ui.navigation.NavigationActivity;
+import com.example.parkmana.ui.parking.ParkingDetailsActivity;
 import com.example.parkmana.ui.parking.ParkingItem;
 import com.example.parkmana.ui.parking.ParkingListActivity;
 import com.google.android.gms.tasks.CancellationTokenSource;
@@ -94,6 +95,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
     private LatLng userLocation;
     private LatLng selectedParkingLocation;
     private String selectedParkingName = "Nearby Parking";
+    private ParkingItem selectedParkingItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -150,8 +152,11 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         findViewById(R.id.seeAllParking).setOnClickListener(v ->
                 openParkingList());
 
+
         findViewById(R.id.btnLocateMe).setOnClickListener(v ->
                 recenterOnCurrentLocation());
+
+        findViewById(R.id.parkingCard).setOnClickListener(v -> openSelectedParkingDetails());
 
         //========================
         // Bottom menu (shared footer)
@@ -260,6 +265,19 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         });
     }
 
+    private void openSelectedParkingDetails() {
+        if (selectedParkingItem == null || userLocation == null) {
+            Toast.makeText(this, "Tap a parking pin first.", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        Intent intent = new Intent(this, ParkingDetailsActivity.class);
+        intent.putExtra(ParkingDetailsActivity.EXTRA_PARKING_ITEM, selectedParkingItem);
+        intent.putExtra(ParkingDetailsActivity.EXTRA_USER_LAT, userLocation.latitude);
+        intent.putExtra(ParkingDetailsActivity.EXTRA_USER_LNG, userLocation.longitude);
+        startActivity(intent);
+    }
+
     private void openParkingList() {
         if (parkingItems.isEmpty() || userLocation == null) {
             Toast.makeText(this,
@@ -292,6 +310,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             selectedParkingName = marker.getTitle();
             selectedParkingLocation = marker.getPosition();
+            selectedParkingItem = findParkingItemByName(selectedParkingName);
 
             parkingNameText.setText(selectedParkingName);
             parkingInfoText.setText(buildInfoLine(
@@ -388,6 +407,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
         parkingNameText.setText("Please wait...");
         parkingInfoText.setText("");
         selectedParkingLocation = null;
+        selectedParkingItem = null;
         btnNavigate.setEnabled(false);
         btnNavigate.setVisibility(View.INVISIBLE);
         parkingItems.clear();
@@ -455,6 +475,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                     JSONObject parking = results.getJSONObject(i);
 
                     String name = parking.getString("name");
+                    String placeId = parking.optString("place_id", null);
 
                     JSONObject loc = parking.getJSONObject("geometry")
                             .getJSONObject("location");
@@ -499,6 +520,7 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
                             name, address, lat, lng, meter,
                             rating, ratingCount, openNow);
                     item.setPhotoReference(photoReference);
+                    item.setPlaceId(placeId);
                     foundParkingItems.add(item);
 
                     runOnUiThread(() -> googleMap.addMarker(
@@ -536,6 +558,15 @@ public class HomeActivity extends AppCompatActivity implements OnMapReadyCallbac
             }
 
         }).start();
+    }
+
+    /** Finds the ParkingItem matching a marker's title, for opening full details. */
+    private ParkingItem findParkingItemByName(String name) {
+        if (name == null) return null;
+        for (ParkingItem item : parkingItems) {
+            if (name.equals(item.getName())) return item;
+        }
+        return null;
     }
 
     /** Combines distance and rating into one line, e.g. "230 m away  ·  ★ 4.5". */

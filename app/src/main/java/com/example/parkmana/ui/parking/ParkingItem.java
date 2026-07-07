@@ -19,6 +19,7 @@ public class ParkingItem implements Serializable {
     private final int ratingCount;
     private final Boolean openNow;
     private String photoReference;
+    private String placeId;
 
     public ParkingItem(String name,
                        String address,
@@ -76,5 +77,13 @@ public class ParkingItem implements Serializable {
 
     public void setPhotoReference(String photoReference) {
         this.photoReference = photoReference;
+    }
+
+    public String getPlaceId() {
+        return placeId;
+    }
+
+    public void setPlaceId(String placeId) {
+        this.placeId = placeId;
     }
 }

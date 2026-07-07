@@ -20,6 +20,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.example.parkmana.R;
 import com.example.parkmana.ui.BottomNavHelper;
+import com.example.parkmana.ui.auth.SignOutHelper;
 import com.example.parkmana.ui.auth.LoginActivity;
 import com.example.parkmana.ui.favourites.FavouritesActivity;
 import com.google.firebase.auth.AuthCredential;
@@ -135,11 +136,8 @@ public class ProfileActivity extends AppCompatActivity {
         findViewById(R.id.profileMyPhotosButton).setOnClickListener(view ->
                 startActivity(new Intent(this, MyPhotosActivity.class)));
 
-        findViewById(R.id.profileSignOutButton).setOnClickListener(view -> {
-            FirebaseAuth.getInstance().signOut();
-            Toast.makeText(this, "Signed out.", Toast.LENGTH_SHORT).show();
-            goToLogin();
-        });
+        findViewById(R.id.profileSignOutButton).setOnClickListener(view ->
+                SignOutHelper.confirmAndSignOut(this));
     }
 
     // =====================================================

@@ -21,21 +21,34 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.parkmana.BuildConfig;
 import com.example.parkmana.R;
 import com.example.parkmana.ui.navigation.NavigationActivity;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.Review;
+import com.google.android.libraries.places.api.net.FetchPlaceRequest;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -48,6 +61,7 @@ public class ParkingDetailsActivity extends AppCompatActivity {
     private static final int MAX_PHOTO_WIDTH = 800;
     private static final int JPEG_QUALITY = 60;
     private static final int MAX_FIRESTORE_BYTES = 900_000; // stay under 1 MiB doc limit
+    private static final String REPORTS_COLLECTION = "parking_reports";
 
     private ParkingItem parking;
     private double userLatitude;
@@ -59,6 +73,16 @@ public class ParkingDetailsActivity extends AppCompatActivity {
     private TextView uploadStatus;
     private EditText photoDescription;
     private Button favouriteButton;
+
+    private RecyclerView reviewsRecyclerView;
+    private TextView reviewsCountLabel;
+    private TextView reviewsEmptyLabel;
+    private ReviewsAdapter reviewsAdapter;
+    private PlacesClient placesClient;
+
+    private RecyclerView reportsRecyclerView;
+    private TextView reportsEmptyLabel;
+    private ParkingReportsAdapter reportsAdapter;
 
     private final ActivityResultLauncher<String> cameraPermissionLauncher =
             registerForActivityResult(
@@ -77,7 +101,7 @@ public class ParkingDetailsActivity extends AppCompatActivity {
                         if (success && pendingPhotoUri != null) {
                             photoPreview.setImageURI(pendingPhotoUri);
                             photoPreview.setVisibility(View.VISIBLE);
-                            savePhotoToFirestore(pendingPhotoUri);
+                            postReport(pendingPhotoUri);
                         } else {
                             uploadStatus.setText("Photo capture cancelled");
                         }
@@ -101,7 +125,10 @@ public class ParkingDetailsActivity extends AppCompatActivity {
         displayParking();
         initializeActions();
         loadFavouriteState();
-        loadExistingPhoto();
+        setupReviews();
+        loadReviews();
+        setupReports();
+        refreshReports();
     }
 
     private boolean readParking() {
@@ -118,6 +145,13 @@ public class ParkingDetailsActivity extends AppCompatActivity {
         uploadStatus = findViewById(R.id.parkingPhotoStatus);
         photoDescription = findViewById(R.id.parkingPhotoDescription);
         favouriteButton = findViewById(R.id.parkingFavouriteButton);
+
+        reviewsRecyclerView = findViewById(R.id.parkingReviewsRecyclerView);
+        reviewsCountLabel = findViewById(R.id.reviewsCountLabel);
+        reviewsEmptyLabel = findViewById(R.id.reviewsEmptyLabel);
+
+        reportsRecyclerView = findViewById(R.id.parkingReportsRecyclerView);
+        reportsEmptyLabel = findViewById(R.id.reportsEmptyLabel);
     }
 
     private void displayParking() {
@@ -149,12 +183,145 @@ public class ParkingDetailsActivity extends AppCompatActivity {
     }
 
     // =====================================================
-    // Camera + per-user photo (users/{uid}/parking_photos/{parkingId})
+    // Google reviews for the currently opened parking location
+    // =====================================================
+
+    private void setupReviews() {
+        reviewsAdapter = new ReviewsAdapter(new ArrayList<>());
+        reviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        reviewsRecyclerView.setAdapter(reviewsAdapter);
+        reviewsRecyclerView.setNestedScrollingEnabled(false);
+        reviewsRecyclerView.setVisibility(View.GONE);
+
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
+        }
+        placesClient = Places.createClient(this);
+    }
+
+    private void loadReviews() {
+        String placeId = parking.getPlaceId();
+        if (isBlank(placeId)) {
+            showReviewsMessage("Reviews unavailable for this location");
+            return;
+        }
+
+        reviewsEmptyLabel.setText("Loading reviews...");
+        reviewsEmptyLabel.setVisibility(View.VISIBLE);
+
+        List<Place.Field> fields = Arrays.asList(
+                Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.REVIEWS);
+        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, fields);
+
+        placesClient.fetchPlace(request)
+                .addOnSuccessListener(response -> {
+                    Place place = response.getPlace();
+
+                    Integer totalRatings = place.getUserRatingsTotal();
+                    reviewsCountLabel.setText(
+                            totalRatings != null ? "(" + totalRatings + ")" : "");
+
+                    List<Review> placeReviews = place.getReviews();
+                    if (placeReviews == null || placeReviews.isEmpty()) {
+                        showReviewsMessage("No reviews yet");
+                        return;
+                    }
+
+                    List<ParkingReview> items = new ArrayList<>();
+                    for (Review review : placeReviews) {
+                        String authorName = (review.getAuthorAttribution() != null
+                                && !isBlank(review.getAuthorAttribution().getName()))
+                                ? review.getAuthorAttribution().getName()
+                                : "Anonymous";
+                        String photoUrl = review.getAuthorAttribution() != null
+                                && review.getAuthorAttribution().getPhotoUri() != null
+                                ? review.getAuthorAttribution().getPhotoUri().toString()
+                                : null;
+                        float rating = review.getRating() != null
+                                ? review.getRating().floatValue() : 0f;
+                        String relativeTime = review.getRelativePublishTimeDescription();
+                        String text = review.getText();
+
+                        items.add(new ParkingReview(authorName, photoUrl, rating, relativeTime, text));
+                    }
+
+                    reviewsEmptyLabel.setVisibility(View.GONE);
+                    reviewsRecyclerView.setVisibility(View.VISIBLE);
+                    reviewsAdapter.submit(items);
+                })
+                .addOnFailureListener(error ->
+                        showReviewsMessage("Could not load reviews: " + readableMessage(error)));
+    }
+
+    private void showReviewsMessage(String message) {
+        reviewsEmptyLabel.setText(message);
+        reviewsEmptyLabel.setVisibility(View.VISIBLE);
+        reviewsRecyclerView.setVisibility(View.GONE);
+    }
+
+    // =====================================================
+    // Community updates: shared across every user (parking_reports collection)
+    // =====================================================
+
+    private void setupReports() {
+        reportsAdapter = new ParkingReportsAdapter(new ArrayList<>());
+        reportsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        reportsRecyclerView.setAdapter(reportsAdapter);
+        reportsRecyclerView.setNestedScrollingEnabled(false);
+        reportsRecyclerView.setVisibility(View.GONE);
+    }
+
+    private void refreshReports() {
+        reportsEmptyLabel.setText("Loading updates...");
+        reportsEmptyLabel.setVisibility(View.VISIBLE);
+
+        FirebaseFirestore.getInstance()
+                .collection(REPORTS_COLLECTION)
+                .whereEqualTo("parkingId", parkingId())
+                .orderBy("createdAt", Query.Direction.DESCENDING)
+                .limit(20)
+                .get()
+                .addOnSuccessListener(snapshot -> {
+                    List<ParkingReport> items = new ArrayList<>();
+                    snapshot.forEach(document -> {
+                        String uploaderName = document.getString("uploaderName");
+                        String description = document.getString("description");
+                        String photoBase64 = document.getString("imageBase64");
+                        Timestamp timestamp = document.getTimestamp("createdAt");
+                        long millis = timestamp != null
+                                ? timestamp.toDate().getTime() : 0L;
+
+                        items.add(new ParkingReport(document.getId(),
+                                isBlank(uploaderName) ? "A ParkMana user" : uploaderName,
+                                description, photoBase64, millis));
+                    });
+
+                    if (items.isEmpty()) {
+                        reportsEmptyLabel.setText(
+                                "No updates yet. Be the first to help other drivers.");
+                        reportsEmptyLabel.setVisibility(View.VISIBLE);
+                        reportsRecyclerView.setVisibility(View.GONE);
+                    } else {
+                        reportsEmptyLabel.setVisibility(View.GONE);
+                        reportsRecyclerView.setVisibility(View.VISIBLE);
+                        reportsAdapter.submit(items);
+                    }
+                })
+                .addOnFailureListener(error -> {
+                    reportsEmptyLabel.setText(
+                            "Could not load updates: " + readableMessage(error));
+                    reportsEmptyLabel.setVisibility(View.VISIBLE);
+                    reportsRecyclerView.setVisibility(View.GONE);
+                });
+    }
+
+    // =====================================================
+    // Camera + posting a shared update
     // =====================================================
 
     private void requestCamera() {
         if (currentUser() == null) {
-            Toast.makeText(this, "Please sign in to add a photo.", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Please sign in to post an update.", Toast.LENGTH_LONG).show();
             return;
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
@@ -178,14 +345,20 @@ public class ParkingDetailsActivity extends AppCompatActivity {
         }
     }
 
-    private void savePhotoToFirestore(Uri photoUri) {
+    /**
+     * Posts a shared update visible to every user who opens this parking
+     * spot (not a private per-user photo). The uploader's display name and
+     * server timestamp are stored alongside it so others can see who
+     * reported it and when.
+     */
+    private void postReport(Uri photoUri) {
         FirebaseUser user = currentUser();
         if (user == null) {
-            uploadStatus.setText("Please sign in to save a photo.");
+            uploadStatus.setText("Please sign in to post an update.");
             return;
         }
 
-        uploadStatus.setText("Saving photo...");
+        uploadStatus.setText("Posting update...");
         try {
             String base64Image = compressToBase64(photoUri);
             if (base64Image == null) {
@@ -193,53 +366,32 @@ public class ParkingDetailsActivity extends AppCompatActivity {
                 return;
             }
 
-            Map<String, Object> photoData = new HashMap<>();
-            photoData.put("parkingId", parkingId());
-            photoData.put("parkingName", parking.getName());
-            photoData.put("parkingLatitude", parking.getLatitude());
-            photoData.put("parkingLongitude", parking.getLongitude());
-            photoData.put("imageBase64", base64Image);
-            photoData.put("description",
-                    photoDescription.getText().toString().trim());
-            photoData.put("createdAt", FieldValue.serverTimestamp());
+            String uploaderName = isBlank(user.getDisplayName())
+                    ? "A ParkMana user" : user.getDisplayName();
 
-            photoDocument(user).set(photoData)
-                    .addOnSuccessListener(unused ->
-                            uploadStatus.setText("Your photo is saved for this parking"))
+            Map<String, Object> reportData = new HashMap<>();
+            reportData.put("parkingId", parkingId());
+            reportData.put("parkingName", parking.getName());
+            reportData.put("uploaderUid", user.getUid());
+            reportData.put("uploaderName", uploaderName);
+            reportData.put("description", photoDescription.getText().toString().trim());
+            reportData.put("imageBase64", base64Image);
+            reportData.put("createdAt", FieldValue.serverTimestamp());
+
+            FirebaseFirestore.getInstance()
+                    .collection(REPORTS_COLLECTION)
+                    .add(reportData)
+                    .addOnSuccessListener(ref -> {
+                        uploadStatus.setText("Update posted — thanks for helping other drivers!");
+                        photoDescription.setText("");
+                        photoPreview.setVisibility(View.GONE);
+                        refreshReports();
+                    })
                     .addOnFailureListener(error ->
-                            uploadStatus.setText("Save failed: " + readableMessage(error)));
+                            uploadStatus.setText("Could not post update: " + readableMessage(error)));
         } catch (IOException error) {
             uploadStatus.setText("Could not read the photo: " + readableMessage(error));
         }
-    }
-
-    private void loadExistingPhoto() {
-        FirebaseUser user = currentUser();
-        if (user == null) return;
-
-        photoDocument(user).get()
-                .addOnSuccessListener(document -> {
-                    if (!document.exists()) return;
-                    String base64 = document.getString("imageBase64");
-                    if (base64 == null) return;
-                    byte[] bytes = Base64.decode(base64, Base64.DEFAULT);
-                    photoPreview.setImageBitmap(
-                            BitmapFactory.decodeByteArray(bytes, 0, bytes.length));
-                    photoPreview.setVisibility(View.VISIBLE);
-
-                    String description = document.getString("description");
-                    if (description != null) {
-                        photoDescription.setText(description);
-                    }
-
-                    uploadStatus.setText("Your photo for this parking");
-                });
-    }
-
-    private DocumentReference photoDocument(FirebaseUser user) {
-        return FirebaseFirestore.getInstance()
-                .collection("users").document(user.getUid())
-                .collection("parking_photos").document(parkingId());
     }
 
     private String compressToBase64(Uri photoUri) throws IOException {
@@ -333,7 +485,7 @@ public class ParkingDetailsActivity extends AppCompatActivity {
     }
 
     private void updateFavouriteButton() {
-        favouriteButton.setText(isFavourite ? "Remove Favourite" : "Add to Favourite");
+        favouriteButton.setText(isFavourite ? "♥" : "♡");
     }
 
     // =====================================================

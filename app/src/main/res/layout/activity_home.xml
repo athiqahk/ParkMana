@@ -2,7 +2,8 @@
 <!-- PAGE 1: Home Map / Nearby Parking UI -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <!-- Real Google Map background -->
     <fragment
@@ -42,10 +43,11 @@
         android:textColor="#FFFFFF"
         android:textSize="24sp" />
 
-    <!-- Bottom card -->
+    <!-- Bottom card: sized to its content (not a fixed 300dp) so the
+         footer sits flush at the bottom, same as every other page -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="@drawable/bg_bottom_card"
         android:orientation="vertical"
@@ -94,13 +96,12 @@
 
         <!-- Parking detail card -->
         <LinearLayout
+            android:id="@+id/parkingCard"
             android:layout_width="match_parent"
             android:layout_height="100dp"
-            android:layout_marginTop="8dp"
-            android:background="@drawable/bg_white_rounded"
-            android:elevation="4dp"
-            android:orientation="horizontal"
-            android:padding="12dp">
+            android:clickable="true"
+            android:focusable="true"
+            android:foreground="?attr/selectableItemBackground">
 
             <!-- Parking photo from Google Places Photo API, with P fallback -->
             <FrameLayout
@@ -172,12 +173,12 @@
             android:textStyle="bold"
             android:visibility="invisible" />
 
-        <!-- Shared bottom navigation -->
+        <!-- Shared bottom navigation: same bare include as every other
+             page, no extra margin, so it sits identically everywhere -->
         <include
             layout="@layout/layout_bottom_nav"
             android:layout_width="match_parent"
-            android:layout_height="64dp"
-            android:layout_marginTop="6dp" />
+            android:layout_height="64dp" />
 
     </LinearLayout>
 

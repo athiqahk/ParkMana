@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.parkmana.R;
 import com.example.parkmana.ui.favourites.FavouritesActivity;
@@ -22,7 +21,6 @@ public final class BottomNavHelper {
 
     public static final String TAB_HOME = "home";
     public static final String TAB_SAVED = "saved";
-    public static final String TAB_ALERTS = "alerts";
     public static final String TAB_PROFILE = "profile";
 
     private static final int COLOR_ACTIVE = Color.parseColor("#FF4B3E");
@@ -34,14 +32,12 @@ public final class BottomNavHelper {
     public static void setup(Activity activity, String currentTab) {
         TextView home = activity.findViewById(R.id.menuHome);
         TextView saved = activity.findViewById(R.id.menuSaved);
-        TextView alerts = activity.findViewById(R.id.menuAlerts);
         TextView profile = activity.findViewById(R.id.menuProfile);
 
         if (home == null) return; // footer not present in this layout
 
         highlight(home, TAB_HOME.equals(currentTab));
         highlight(saved, TAB_SAVED.equals(currentTab));
-        highlight(alerts, TAB_ALERTS.equals(currentTab));
         highlight(profile, TAB_PROFILE.equals(currentTab));
 
         home.setOnClickListener(view -> {
@@ -59,10 +55,6 @@ public final class BottomNavHelper {
                         new Intent(activity, FavouritesActivity.class));
             }
         });
-
-        alerts.setOnClickListener(view ->
-                Toast.makeText(activity, "Alerts coming soon!",
-                        Toast.LENGTH_SHORT).show());
 
         profile.setOnClickListener(view -> {
             if (!TAB_PROFILE.equals(currentTab)) {
