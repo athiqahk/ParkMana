@@ -46,17 +46,17 @@ public class OnboardingActivity extends AppCompatActivity {
                 R.drawable.onboarding_find,
                 "Step 1 of 3",
                 "Find Parking Near You",
-                "Locate nearby parking spaces instantly using GPS — see live availability the moment you open the app."));
+                "Search nearby parking spots on the map and tap any pin to view distance, rating, hours, and details."));
         items.add(new OnboardingItem(
                 R.drawable.onboarding_navigate,
                 "Step 2 of 3",
                 "Navigate Easily",
-                "Get clear turn-by-turn directions straight to your selected parking location, the moment you pick it."));
+                "Choose a parking location, preview the distance and time, then open directions when you are ready."));
         items.add(new OnboardingItem(
                 R.drawable.onboarding_alert,
                 "Step 3 of 3",
-                "Stay Updated",
-                "Receive parking availability alerts and updates so you never circle the block looking for a spot again."));
+                "Review Details & Save",
+                "Check ratings, hours, reviews, and driver updates, then save favourite parking spots for later."));
     }
 
     private void setupViewPager() {
