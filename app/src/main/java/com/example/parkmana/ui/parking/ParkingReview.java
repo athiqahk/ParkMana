@@ -7,7 +7,6 @@ package com.example.parkmana.ui.parking;
 public class ParkingReview {
 
     private final String authorName;
-    private final String authorPhotoUrl;
     private final float rating;
     private final String relativeTime;
     private final String text;
@@ -15,7 +14,6 @@ public class ParkingReview {
     public ParkingReview(String authorName, String authorPhotoUrl, float rating,
                          String relativeTime, String text) {
         this.authorName = authorName;
-        this.authorPhotoUrl = authorPhotoUrl;
         this.rating = rating;
         this.relativeTime = relativeTime;
         this.text = text;

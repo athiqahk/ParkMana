@@ -106,10 +106,13 @@ public class ProfileActivity extends AppCompatActivity {
                 .addOnSuccessListener(snapshot ->
                         favouriteCountText.setText(String.valueOf(snapshot.size())));
 
-        db.collection("users").document(user.getUid())
-                .collection("parking_photos").get()
+        db.collection("parking_reports")
+                .whereEqualTo("uploaderUid", user.getUid())
+                .get()
                 .addOnSuccessListener(snapshot ->
-                        photoCountText.setText(String.valueOf(snapshot.size())));
+                        photoCountText.setText(String.valueOf(snapshot.size())))
+                .addOnFailureListener(error ->
+                        photoCountText.setText("0"));
     }
 
     private void initializeActions() {

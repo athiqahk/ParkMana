@@ -28,6 +28,15 @@ import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 import com.google.android.material.textfield.TextInputEditText;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.ApiException;
+
 import java.util.concurrent.Executors;
 
 /**
@@ -48,12 +57,46 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         viewModel = new ViewModelProvider(this).get(AuthViewModel.class);
-        credentialManager = CredentialManager.create(this);
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+
+        googleSignInClient = GoogleSignIn.getClient(this, gso);
 
         setupCreateAccountLink();
         observeViewModel();
         setupClicks();
     }
+
+    private GoogleSignInClient googleSignInClient;
+
+    private final ActivityResultLauncher<Intent> googleSignInLauncher =
+            registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        try {
+                            GoogleSignInAccount account = GoogleSignIn
+                                    .getSignedInAccountFromIntent(result.getData())
+                                    .getResult(ApiException.class);
+
+                            String idToken = account.getIdToken();
+
+                            if (idToken == null || idToken.trim().isEmpty()) {
+                                binding.progressBar.setVisibility(View.GONE);
+                                Toast.makeText(this, "Google ID token is empty.", Toast.LENGTH_LONG).show();
+                                return;
+                            }
+
+                            viewModel.signInWithGoogle(idToken);
+
+                        } catch (ApiException e) {
+                            binding.progressBar.setVisibility(View.GONE);
+                            Toast.makeText(this,
+                                    "Google sign-in failed: " + e.getStatusCode(),
+                                    Toast.LENGTH_LONG).show();
+                        }
+                    });
 
     private void setupClicks() {
         binding.btnLogin.setOnClickListener(v -> attemptLogin());
@@ -90,40 +133,12 @@ public class LoginActivity extends AppCompatActivity {
     // ---------- Google Sign-In (Credential Manager) ----------
 
     private void startGoogleSignIn() {
-        // Build a request for a Google ID token, tied to our Web client ID.
-        GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
-                .setFilterByAuthorizedAccounts(false)   // show all Google accounts, not just previously used
-                .setServerClientId(getString(R.string.default_web_client_id))
-                .build();
-
-        GetCredentialRequest request = new GetCredentialRequest.Builder()
-                .addCredentialOption(googleIdOption)
-                .build();
-
         binding.progressBar.setVisibility(View.VISIBLE);
 
-        credentialManager.getCredentialAsync(
-                this,
-                request,
-                null,                               // no cancellation signal
-                Executors.newSingleThreadExecutor(),
-                new CredentialManagerCallback<GetCredentialResponse, GetCredentialException>() {
-                    @Override
-                    public void onResult(GetCredentialResponse response) {
-                        // Callback runs on a background thread — hop to the UI thread.
-                        runOnUiThread(() -> handleGoogleResponse(response));
-                    }
-
-                    @Override
-                    public void onError(GetCredentialException e) {
-                        runOnUiThread(() -> {
-                            binding.progressBar.setVisibility(View.GONE);
-                            Toast.makeText(LoginActivity.this,
-                                    "Google sign-in cancelled or failed: " + e.getMessage(),
-                                    Toast.LENGTH_LONG).show();
-                        });
-                    }
-                });
+        googleSignInClient.signOut().addOnCompleteListener(task -> {
+            Intent signInIntent = googleSignInClient.getSignInIntent();
+            googleSignInLauncher.launch(signInIntent);
+        });
     }
 
     private void handleGoogleResponse(GetCredentialResponse response) {
@@ -138,6 +153,11 @@ public class LoginActivity extends AppCompatActivity {
 
                 String idToken = googleCredential.getIdToken();
                 // Hand the token to the ViewModel, which signs into Firebase.
+                if (idToken == null || idToken.trim().isEmpty()) {
+                    binding.progressBar.setVisibility(View.GONE);
+                    Toast.makeText(this, "Google ID token is empty.", Toast.LENGTH_LONG).show();
+                    return;
+                }
                 viewModel.signInWithGoogle(idToken);
             } else {
                 binding.progressBar.setVisibility(View.GONE);

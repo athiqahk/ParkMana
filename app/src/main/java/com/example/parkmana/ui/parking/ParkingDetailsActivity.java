@@ -25,14 +25,8 @@ import androidx.core.content.FileProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.parkmana.BuildConfig;
 import com.example.parkmana.R;
 import com.example.parkmana.ui.navigation.NavigationActivity;
-import com.google.android.libraries.places.api.Places;
-import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.Review;
-import com.google.android.libraries.places.api.net.FetchPlaceRequest;
-import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.firebase.Timestamp;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -47,7 +41,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -76,12 +69,6 @@ public class ParkingDetailsActivity extends AppCompatActivity {
     private TextView uploadStatus;
     private EditText photoDescription;
     private ImageButton favouriteButton;
-
-    private RecyclerView reviewsRecyclerView;
-    private TextView reviewsCountLabel;
-    private TextView reviewsEmptyLabel;
-    private ReviewsAdapter reviewsAdapter;
-    private PlacesClient placesClient;
 
     private RecyclerView reportsRecyclerView;
     private TextView reportsEmptyLabel;
@@ -128,8 +115,6 @@ public class ParkingDetailsActivity extends AppCompatActivity {
         displayParking();
         initializeActions();
         loadFavouriteState();
-        setupReviews();
-        loadReviews();
         setupReports();
         refreshReports();
     }
@@ -148,10 +133,6 @@ public class ParkingDetailsActivity extends AppCompatActivity {
         uploadStatus = findViewById(R.id.parkingPhotoStatus);
         photoDescription = findViewById(R.id.parkingPhotoDescription);
         favouriteButton = findViewById(R.id.parkingFavouriteButton);
-
-        reviewsRecyclerView = findViewById(R.id.parkingReviewsRecyclerView);
-        reviewsCountLabel = findViewById(R.id.reviewsCountLabel);
-        reviewsEmptyLabel = findViewById(R.id.reviewsEmptyLabel);
 
         reportsRecyclerView = findViewById(R.id.parkingReportsRecyclerView);
         reportsEmptyLabel = findViewById(R.id.reportsEmptyLabel);
@@ -185,91 +166,7 @@ public class ParkingDetailsActivity extends AppCompatActivity {
                 view -> openNavigation());
     }
 
-    // =====================================================
-    // Google reviews for the currently opened parking location — shown
-    // entirely in-app via the RecyclerView below. Note: Google's Places
-    // API caps review data at a maximum of 5 "most relevant" reviews per
-    // place, with no pagination for more — that's a platform limit, so
-    // this list is the full extent of what's available through the API.
-    // =====================================================
 
-    private void setupReviews() {
-        reviewsAdapter = new ReviewsAdapter(new ArrayList<>());
-        reviewsRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        reviewsRecyclerView.setAdapter(reviewsAdapter);
-        reviewsRecyclerView.setNestedScrollingEnabled(false);
-        reviewsRecyclerView.setVisibility(View.GONE);
-
-        if (!Places.isInitialized()) {
-            Places.initialize(getApplicationContext(), BuildConfig.MAPS_API_KEY);
-        }
-        placesClient = Places.createClient(this);
-    }
-
-    private void loadReviews() {
-        String placeId = parking.getPlaceId();
-        if (isBlank(placeId)) {
-            showReviewsMessage("Reviews unavailable for this location");
-            return;
-        }
-
-        reviewsEmptyLabel.setText("Loading reviews...");
-        reviewsEmptyLabel.setVisibility(View.VISIBLE);
-
-        List<Place.Field> fields = Arrays.asList(
-                Place.Field.RATING, Place.Field.USER_RATINGS_TOTAL, Place.Field.REVIEWS);
-        FetchPlaceRequest request = FetchPlaceRequest.newInstance(placeId, fields);
-
-        placesClient.fetchPlace(request)
-                .addOnSuccessListener(response -> {
-                    Place place = response.getPlace();
-
-                    Integer totalRatings = place.getUserRatingsTotal();
-                    reviewsCountLabel.setText(
-                            totalRatings != null ? "(" + totalRatings + ")" : "");
-
-                    List<Review> placeReviews = place.getReviews();
-                    if (placeReviews == null || placeReviews.isEmpty()) {
-                        showReviewsMessage("No reviews yet");
-                        return;
-                    }
-
-                    List<ParkingReview> items = new ArrayList<>();
-                    for (Review review : placeReviews) {
-                        String authorName = (review.getAuthorAttribution() != null
-                                && !isBlank(review.getAuthorAttribution().getName()))
-                                ? review.getAuthorAttribution().getName()
-                                : "Anonymous";
-                        String photoUrl = review.getAuthorAttribution() != null
-                                && review.getAuthorAttribution().getPhotoUri() != null
-                                ? review.getAuthorAttribution().getPhotoUri().toString()
-                                : null;
-                        float rating = review.getRating() != null
-                                ? review.getRating().floatValue() : 0f;
-                        String relativeTime = review.getRelativePublishTimeDescription();
-                        String text = review.getText();
-
-                        items.add(new ParkingReview(authorName, photoUrl, rating, relativeTime, text));
-                    }
-
-                    reviewsEmptyLabel.setVisibility(View.GONE);
-                    reviewsRecyclerView.setVisibility(View.VISIBLE);
-                    reviewsAdapter.submit(items);
-                })
-                .addOnFailureListener(error -> {
-                    // Logged so a genuine failure (API not enabled, quota,
-                    // bad key restriction, etc.) is visible in Logcat instead
-                    // of looking identical to "the place just has no reviews".
-                    Log.e(TAG, "fetchPlace(REVIEWS) failed for placeId=" + placeId, error);
-                    showReviewsMessage("Could not load reviews: " + readableMessage(error));
-                });
-    }
-
-    private void showReviewsMessage(String message) {
-        reviewsEmptyLabel.setText(message);
-        reviewsEmptyLabel.setVisibility(View.VISIBLE);
-        reviewsRecyclerView.setVisibility(View.GONE);
-    }
 
     // =====================================================
     // Community updates: shared across every user (parking_reports collection)

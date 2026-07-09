@@ -133,53 +133,6 @@
                     android:src="@drawable/ic_favourite_outline" />
             </LinearLayout>
 
-            <!-- ===================== Google Reviews section ===================== -->
-            <!-- Shown fully in-app. Google's Places API caps this at a max of
-                 5 "most relevant" reviews per place with no pagination — that
-                 is the full extent of what's fetchable, by design of the API
-                 itself, not a limitation of this screen. -->
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="26dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Reviews"
-                    android:textColor="#2D3436"
-                    android:textSize="17sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/reviewsCountLabel"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textColor="#8A94A0"
-                    android:textSize="13sp" />
-            </LinearLayout>
-
-            <TextView
-                android:id="@+id/reviewsEmptyLabel"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:gravity="center"
-                android:text="Loading reviews..."
-                android:textColor="#8A94A0"
-                android:textSize="12sp" />
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/parkingReviewsRecyclerView"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:nestedScrollingEnabled="false" />
-
             <!-- =================== Community Updates section =================== -->
 
             <TextView
