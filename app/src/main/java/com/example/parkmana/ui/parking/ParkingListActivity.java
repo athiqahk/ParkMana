@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.parkmana.R;
+import com.example.parkmana.ui.BottomNavHelper;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -90,7 +91,7 @@ public class ParkingListActivity extends AppCompatActivity {
         findViewById(R.id.parkingListBack).setOnClickListener(closeListener);
         findViewById(R.id.parkingListClose).setOnClickListener(closeListener);
         findViewById(R.id.parkingMapView).setOnClickListener(closeListener);
-        findViewById(R.id.parkingListHome).setOnClickListener(closeListener);
+        BottomNavHelper.setup(this, BottomNavHelper.TAB_HOME);
 
         filterNearest.setOnClickListener(view -> {
             sortMode = SortMode.NEAREST;

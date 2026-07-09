@@ -59,7 +59,7 @@
                 android:paddingEnd="12dp"
                 android:background="@drawable/bg_white_rounded"
                 android:text="Edit"
-                android:textColor="#FF4B3E"
+                android:textColor="#FFFFFF"
                 android:textSize="11sp"
                 android:textStyle="bold" />
 

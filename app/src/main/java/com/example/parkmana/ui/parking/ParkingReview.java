@@ -25,10 +25,6 @@ public class ParkingReview {
         return authorName;
     }
 
-    public String getAuthorPhotoUrl() {
-        return authorPhotoUrl;
-    }
-
     public float getRating() {
         return rating;
     }

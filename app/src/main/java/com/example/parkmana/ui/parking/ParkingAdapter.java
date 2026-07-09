@@ -72,7 +72,7 @@ public class ParkingAdapter extends RecyclerView.Adapter<ParkingAdapter.ParkingV
 
         if (item.getOpenNow() == null) {
             holder.status.setText("Hours unknown");
-            holder.status.setBackgroundResource(R.drawable.bg_grey_label);
+            holder.status.setBackgroundResource(R.drawable.bg_orange_label);
         } else if (item.getOpenNow()) {
             holder.status.setText("OPEN");
             holder.status.setBackgroundResource(R.drawable.bg_green_label);
